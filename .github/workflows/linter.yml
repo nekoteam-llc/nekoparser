@@ -1,0 +1,26 @@
+name: pre-commit
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pre-commit:
+    env:
+      SKIP: no-commit-to-branch
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install poetry
+        run: pipx install poetry
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "poetry"
+      - run: poetry install --with=prefect --with=dev --with=backend
+      - uses: pre-commit/action@v3.0.0

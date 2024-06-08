@@ -1,0 +1,56 @@
+[tool.ruff]
+line-length = 90
+target-version = "py312"
+
+[tool.ruff.lint]
+extend-select = ["I"]
+
+[tool.pyright]
+standard = true
+reportUnnecessaryTypeIgnoreComment = true
+
+[tool.ruff.lint.isort]
+known-first-party = [
+    "packages",
+    "transformations",
+    "backend",
+]
+
+[tool.poetry]
+name = "megaparser"
+version = "0.0.1"
+description = "Generic HTML, XLSX and PDF parser for products"
+authors = [
+    "hikariatama <d.gazizullin@dan.tatar>",
+    # TODO: Add other team members
+]
+license = "GNU AGPLv3"
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pydantic = "^2.7.3"
+pydantic-settings = "^2.3.1"
+psycopg2-binary = "^2.9.9"
+sqlalchemy = "^2.0.30"
+python-dotenv = "^1.0.1"
+sentry-sdk = "^2.5.1"
+structlog = "^24.2.0"
+
+[tool.poetry.group.dev.dependencies]
+pyright = "1.1.350"
+ruff = "^0.4.8"
+pre-commit = "^3.7.1"
+
+[tool.poetry.group.backend.dependencies]
+fastapi = "^0.111.0"
+uvicorn = "0.28.0"
+
+[tool.poetry.group.prefect.dependencies]
+prefect = "^2.19.4"
+aiohttp = "^3.9.5"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

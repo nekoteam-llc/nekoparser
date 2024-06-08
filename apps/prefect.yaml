@@ -1,0 +1,28 @@
+name: megaparser
+prefect-version: 2.19.4
+
+build:
+push:
+pull:
+  - prefect.deployments.steps.git_clone:
+      repository: https://github.com/hikariatama/swp-project
+      branch: main
+      access_token: "{{ prefect.blocks.secret.github-token}}"
+
+definitions:
+  schedules:
+    every_ten_minutes: &every_ten_minutes
+      interval: 600
+    every_thirty_minutes: &every_thirty_minutes
+      interval: 1800
+    every_hour: &every_hour
+      interval: 3600
+    every_week: &every_week
+      interval: 604800
+
+deployments:
+  - name: Sample Pipeline
+    tags: [Sample]
+    description: Performs the sum of squares operation
+    schedules: [*every_ten_minutes]
+    entrypoint: transformations.sample.pipeline:sample_pipeline
