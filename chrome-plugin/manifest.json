@@ -1,0 +1,26 @@
+{
+  "name": "MegaParser Picker",
+  "description": "Service utility to select the proper elements' samples.",
+  "version": "1.0.0",
+  "author": "Daniil Gazizullin",
+  "manifest_version": 2,
+  "permissions": [
+    "tabs",
+    "storage",
+    "<all_urls>"
+  ],
+  "content_scripts": [
+    {
+      "run_at": "document_start",
+      "js": [
+        "inject.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ],
+  "web_accessible_resources": [
+    "injected.js"
+  ]
+}

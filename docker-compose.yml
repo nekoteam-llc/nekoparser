@@ -1,0 +1,105 @@
+x-config-env: &config-env
+  PREFECT_API_URL: http://prefect-server:4200/api
+  DB_HOST: postgres
+  DB_PORT: 5432
+  DB_NAME: postgres
+  DB_USER: postgres
+  DB_PASSWORD: ${POSTGRES_PASSWORD}
+  BACKEND_URL: http://backend:31228
+  LOG_LEVEL: WARNING
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    working_dir: /opt/nekoparser/apps
+    environment: *config-env
+    command: uvicorn backend.server:app --host 0.0.0.0 --port 31228
+    stop_signal: SIGINT
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, curl, -f, "http://0.0.0.0:31228/api/v1/ping"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "31222:31228"
+    volumes:
+      - prefect_caches:/root/.prefect/storage
+    depends_on:
+      - prefect-server
+      - postgres
+  frontend:
+    build:
+      context: .
+      dockerfile: ./frontend.Dockerfile
+    stop_signal: SIGINT
+    restart: unless-stopped
+    ports:
+      - "31224:3000"
+    depends_on:
+      - backend
+  prefect-worker:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    volumes:
+      - prefect:/root/.prefect
+    working_dir: /opt/nekoparser/apps
+    environment: *config-env
+    command: python3 -m transformations
+    stop_signal: SIGINT
+    restart: unless-stopped
+    depends_on:
+      - prefect-server
+  prefect-server:
+    image: prefecthq/prefect:2.19.4-python3.12
+    restart: always
+    entrypoint: [/opt/prefect/entrypoint.sh, prefect, server, start]
+    environment:
+      - PREFECT_UI_URL=http://127.0.0.1:4200
+      - PREFECT_API_URL=http://127.0.0.1:4200/api
+      #- PREFECT_UI_URL=http://external-ip:4200
+      #- PREFECT_API_URL=http://external-ip:4200/api
+      - PREFECT_SERVER_API_HOST=0.0.0.0
+      - PREFECT_API_DATABASE_CONNECTION_URL=postgresql+asyncpg://postgres:${POSTGRES_PASSWORD}@postgres:5432/prefect
+    ports:
+      - 31223:4200
+    depends_on:
+      - postgres
+  postgres:
+    image: postgres:13.3-alpine
+    hostname: postgres
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=postgres
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, pg_isready, -U, postgres]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+    ports:
+      - "31226:5432"
+  minio:
+    image: minio/minio
+    ports:
+      - "31220:9000"
+      - "31221:9001"
+    volumes:
+      - minio_storage:/data
+    environment:
+      MINIO_ROOT_USER: user
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    command: server --console-address ":9001" /data
+
+volumes:
+  postgres:
+  minio_storage:
+  prefect:
+  prefect_caches:
