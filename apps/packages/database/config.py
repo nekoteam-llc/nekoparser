@@ -6,11 +6,11 @@ class DatabaseConfig(BaseConfig):
     Database configuration
     """
 
-    host: str
-    port: int
-    user: str
-    password: str
-    name: str
+    db_host: str
+    db_port: int
+    db_user: str
+    db_password: str
+    db_name: str
 
 
 config = DatabaseConfig()  # pyright: ignore[reportCallIssue]

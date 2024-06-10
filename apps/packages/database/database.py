@@ -8,11 +8,11 @@ from .config import config
 
 SQLALCHEMY_DATABASE_URL = URL.create(
     drivername="postgresql",
-    username=config.user,
-    host=config.host,
-    password=config.password,
-    port=config.port,
-    database=config.name,
+    username=config.db_user,
+    host=config.db_host,
+    password=config.db_password,
+    port=config.db_port,
+    database=config.db_name,
 )
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 metadata = MetaData(
