@@ -10,6 +10,22 @@ from ..database import Base
 __all__ = ["WebsiteSource", "FileSource", "FileType", "Product"]
 
 
+class WebsiteSourceState(enum.Enum):
+    """
+    Represents the state of the website source
+    """
+
+    CREATED = "created"
+    UNAVAILABLE = "unavailable"
+    SCRAPED = "scraped"
+    XREFS_PENDING_APPROVAL = "xrefs_pending_approval"
+    XREFS_APPROVED = "xrefs_approved"
+    XREFS_DISCARDED = "xrefs_discarded"
+    DATA_PENDING_APPROVAL = "data_pending_approval"
+    DATA_DISCARDED = "data_discarded"
+    DATA_APPROVED = "data_approved"
+
+
 class WebsiteSource(Base):
     """
     Represents a data scraping source in the form of the website
@@ -24,6 +40,7 @@ class WebsiteSource(Base):
         nullable=False,
     )
     url = mapped_column(Text, nullable=False)
+    contents = mapped_column(Text, comment="The contents of the website")
     ui_name = mapped_column(Text, comment="Website title")
     ui_description = mapped_column(Text, comment="Website meta description")
     ui_image = mapped_column(Text, comment="Website meta image / favicon")
@@ -37,6 +54,12 @@ class WebsiteSource(Base):
     last_processed = mapped_column(
         DateTime,
         comment="The last time the website was processed",
+    )
+    state = mapped_column(
+        Enum(WebsiteSourceState),
+        nullable=False,
+        default=WebsiteSourceState.CREATED,
+        comment="The FSM state of the website source",
     )
 
 

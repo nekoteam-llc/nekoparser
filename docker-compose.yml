@@ -19,6 +19,18 @@ services:
       - "31222:31228"
     depends_on:
       - prefect-server
+  prefect-worker:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    working_dir: /opt/megaparser/apps
+    environment:
+      - PREFECT_API_URL=http://prefect-server:4200/api
+    command: python3 -m transformations
+    stop_signal: SIGINT
+    restart: unless-stopped
+    depends_on:
+      - prefect-server
   prefect-server:
     image: prefecthq/prefect:2.19.4-python3.12
     restart: always

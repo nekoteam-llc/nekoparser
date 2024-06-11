@@ -50,6 +50,7 @@ uvicorn = "0.28.0"
 [tool.poetry.group.prefect.dependencies]
 prefect = "^2.19.4"
 aiohttp = "^3.9.5"
+bs4 = "^0.0.2"
 
 [build-system]
 requires = ["poetry-core"]

@@ -12,6 +12,18 @@ from .config import config
 __all__ = ["get_logger"]
 
 
+class PrefectRedirectLogger:
+    def __init__(self, level):
+        self.level = level
+
+    def write(self, message):
+        if message != "\n":
+            self.level(message)
+
+    def flush(self):
+        self.level(sys.stderr)
+
+
 class CustomLogging:
     def __init__(self):
         self._setup_complete: bool = False
@@ -106,7 +118,10 @@ class CustomLogging:
             from prefect import get_run_logger
 
             logging.getLogger("httpx").setLevel(logging.WARNING)
-            return get_run_logger()
+            run_logger = get_run_logger()
+            sys.stdout = PrefectRedirectLogger(run_logger.info)
+            sys.stderr = PrefectRedirectLogger(run_logger.error)
+            return run_logger
 
         return structlog.get_logger()
 

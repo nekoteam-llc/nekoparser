@@ -1,9 +1,9 @@
 """
-Initial Migration
+Initial
 
-Revision ID: d33e9aea1faf
+Revision ID: 5ab9fdac509c
 Revises:
-Create Date: 2024-06-10 12:47:22.210127
+Create Date: 2024-06-11 20:30:29.896285
 """
 
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-revision: str = "d33e9aea1faf"
+revision: str = "5ab9fdac509c"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -30,7 +30,9 @@ def upgrade() -> None:
             comment="The UUID of the file in the MinIO storage",
         ),
         sa.Column(
-            "file_type", sa.Enum("CSV", "XLSX", "PDF", name="filetype"), nullable=False
+            "file_type",
+            sa.Enum("CSV", "XLSX", "PDF", name="filetype"),
+            nullable=False,
         ),
         sa.Column(
             "file_metadata",
@@ -73,12 +75,24 @@ def upgrade() -> None:
         "website_source",
         sa.Column("id", sa.UUID(as_uuid=False), nullable=False),
         sa.Column("url", sa.Text(), nullable=False),
+        sa.Column(
+            "contents",
+            sa.Text(),
+            nullable=True,
+            comment="The contents of the website",
+        ),
         sa.Column("ui_name", sa.Text(), nullable=True, comment="Website title"),
         sa.Column(
-            "ui_description", sa.Text(), nullable=True, comment="Website meta description"
+            "ui_description",
+            sa.Text(),
+            nullable=True,
+            comment="Website meta description",
         ),
         sa.Column(
-            "ui_image", sa.Text(), nullable=True, comment="Website meta image / favicon"
+            "ui_image",
+            sa.Text(),
+            nullable=True,
+            comment="Website meta image / favicon",
         ),
         sa.Column(
             "product_card_xref",
@@ -98,6 +112,23 @@ def upgrade() -> None:
             nullable=True,
             comment="The last time the website was processed",
         ),
+        sa.Column(
+            "state",
+            sa.Enum(
+                "CREATED",
+                "UNAVAILABLE",
+                "SCRAPED",
+                "XREFS_PENDING_APPROVAL",
+                "XREFS_APPROVED",
+                "XREFS_DISCARDED",
+                "DATA_PENDING_APPROVAL",
+                "DATA_DISCARDED",
+                "DATA_APPROVED",
+                name="websitesourcestate",
+            ),
+            nullable=False,
+            comment="The FSM state of the website source",
+        ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_website_source")),
     )
     # ### end Alembic commands ###
@@ -108,4 +139,6 @@ def downgrade() -> None:
     op.drop_table("website_source")
     op.drop_table("product")
     op.drop_table("file_source")
+    op.execute("DROP TYPE filetype")
+    op.execute("DROP TYPE websitesourcestate")
     # ### end Alembic commands ###
