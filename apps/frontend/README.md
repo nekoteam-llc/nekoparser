@@ -16,7 +16,6 @@ This Turborepo includes the following packages/apps:
 
 ### Apps and Packages
 
-- `docs`: a [svelte-kit](https://kit.svelte.dev/) app
 - `web`: another [svelte-kit](https://kit.svelte.dev/) app
 - `ui`: a stub Svelte component library shared by both `web` and `docs` applications
 - `eslint-config-custom`: `eslint` configurations (includes `eslint-plugin-svelte` and `eslint-config-prettier`)

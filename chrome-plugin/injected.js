@@ -1,4 +1,4 @@
-const highlight_similar = (link) => {
+function highlight_similar (link) {
   url = link.href;
   const path_component = url.startsWith("/")
     ? url.split("/")[1]
@@ -55,9 +55,9 @@ const highlight_similar = (link) => {
     }
     current_elem = current_elem.parentNode;
   }
-};
+}
 
-const hook_event_listeners = () => {
+function hook_event_listeners () {
   document.querySelectorAll("a").forEach((link) => {
     link.removeEventListener("click", () => {});
   });
@@ -76,7 +76,7 @@ const hook_event_listeners = () => {
       }
     });
   });
-};
+}
 
 console.log("Hook'er is active!");
 window.productXrefFound = false;
@@ -140,8 +140,8 @@ window.addEventListener("load", () => {
 
   setInterval(() => {
     const tooltip = document.querySelector(".swp-tooltip");
-    tooltip.style.top = window.tooltipPositionY + 20 + "px";
-    tooltip.style.left = window.tooltipPositionX + 20 + "px";
+    tooltip.style.top = `${window.tooltipPositionY + 20  }px`;
+    tooltip.style.left = `${window.tooltipPositionX + 20  }px`;
   }, 100);
 
   document.addEventListener("mousemove", (e) => {

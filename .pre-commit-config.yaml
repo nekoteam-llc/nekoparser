@@ -11,15 +11,41 @@ repos:
       - id: check-toml
       - id: no-commit-to-branch
         args: [--branch, master]
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.4.8
+  - repo: local
     hooks:
       - id: ruff
-        args: [--fix]
+        name: ruff
+        entry: poetry run ruff check . --fix
+        language: system
+        pass_filenames: false
+        types: [python]
       - id: ruff-format
-  - repo: https://github.com/RobertCraigie/pyright-python
-    rev: v1.1.350
+        name: ruff-format
+        entry: poetry run ruff format
+        language: system
+        pass_filenames: false
+        types: [python]
+  - repo: local
     hooks:
-    - id: pyright
-      entry: poetry
-      args: ["run", "pyright"]
+      - id: pyright
+        name: pyright
+        entry: poetry run pyright -p .
+        language: system
+        pass_filenames: false
+        types: [python]
+  - repo: local
+    hooks:
+      - id: prettier
+        name: prettier
+        entry: bash -c "cd apps/frontend && pnpm run format"
+        language: system
+        pass_filenames: false
+        files: "\\.(css|html|scss|js|ts|jsx|tsx|svelte|yaml|json|md)$"
+  - repo: local
+    hooks:
+      - id: eslint
+        name: eslint
+        entry: eslint --fix -c apps/frontend/web/eslint.config.js apps/frontend/web
+        language: system
+        pass_filenames: false
+        types: [javascript]

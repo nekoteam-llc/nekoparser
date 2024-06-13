@@ -8,14 +8,6 @@ extend-select = ["I"]
 [tool.pyright]
 standard = true
 reportUnnecessaryTypeIgnoreComment = true
-
-[tool.ruff.lint.isort]
-known-first-party = [
-    "packages",
-    "transformations",
-    "backend",
-]
-
 [tool.poetry]
 name = "megaparser"
 version = "0.0.1"
@@ -27,6 +19,13 @@ authors = [
 license = "GNU AGPLv3"
 readme = "README.md"
 package-mode = false
+
+[tool.ruff.lint.isort]
+known-first-party = [
+    "packages",
+    "transformations",
+    "backend",
+]
 
 [tool.poetry.dependencies]
 python = "^3.12"
