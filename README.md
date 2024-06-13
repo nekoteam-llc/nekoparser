@@ -4,9 +4,9 @@
 Extensible parser for HTML pages, XLSX tables, PDF documents. Extracts data in the format known to [Satu.kz](https://satu.kz) and optionally uploads it to the website.
 
 ## Deployment
-1. Install docker and `docker-compose`
+1. Install docker and `docker compose`
 2. Clone the repository
-3. Run `docker-compose up -d --build`
+3. Run `docker compose up -d --build`
 
 ## Development
 1. Install `poetry`: `pip install poetry -U`
