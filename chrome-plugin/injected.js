@@ -1,4 +1,39 @@
-function highlight_similar (link) {
+function build_url_regex(urls) {
+  common_parts = [];
+  base_parts = urls[0].split("/");
+  for (let i = 0; i < base_parts.length; i++) {
+    common = true;
+    for (let j = 1; j < urls.length; j++) {
+      if (urls[j].split("/")[i] !== base_parts[i]) {
+        common = false;
+        break;
+      }
+    }
+    if (common) {
+      common_parts.push(base_parts[i]);
+    } else {
+      break;
+    }
+  }
+  url_string = "";
+  for (let i = 0; i < common_parts.length; i++) {
+    url_string += `\\/${common_parts[i].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`;
+  }
+  url_string = url_string.substring(2);
+  for (let i = common_parts.length; i < base_parts.length; i++) {
+    if (base_parts[i] === "") {
+      continue;
+    }
+    url_string += `\\/[^/]*?`;
+  }
+  url_string += "\\/?(?:[?#].*?)?$";
+  offset = url_string.lastIndexOf("[^/]*?");
+  url_string = url_string.substring(0, offset) + url_string.substring(offset).replace("[^/]*?", "[^/]*");
+  return url_string;
+}
+
+
+function highlight_similar(link) {
   url = link.href;
   const path_component = url.startsWith("/")
     ? url.split("/")[1]
@@ -33,16 +68,23 @@ function highlight_similar (link) {
 
       document.querySelector(".swp-button").addEventListener("click", () => {
         window.productXrefFound = true;
-        window.productXrefs = [];
+        urls = [];
         document.querySelectorAll(".swp-highlighted").forEach((elem) => {
-          if (!window.productXrefs.includes(elem.href)) {
-            window.productXrefs.push(elem.href);
+          if (!urls.includes(elem.href)) {
+            urls.push(elem.href);
           }
+          window.sampleProductUrl = elem.href;
         });
+
+        url_string = build_url_regex(urls);
+        console.log(`Regex for products: ${url_string}`);
+
+        window.localStorage.setItem("product_regex", url_string);
+
         document.querySelector(".swp-button").remove();
         document.querySelector(
           ".swp-tooltip p"
-        ).innerText = `XREF for products saved. Now try to open the second page of the website.`;
+        ).innerText = `Regex for products saved. Now try to open the second page of the website.`;
         document.querySelectorAll(".swp-highlighted").forEach((elem) => {
           elem.classList.remove("swp-highlighted");
         });
@@ -57,9 +99,9 @@ function highlight_similar (link) {
   }
 }
 
-function hook_event_listeners () {
+function hook_event_listeners() {
   document.querySelectorAll("a").forEach((link) => {
-    link.removeEventListener("click", () => {});
+    link.removeEventListener("click", () => { });
   });
   document.querySelectorAll("a").forEach((link) => {
     link.addEventListener("click", (e) => {
@@ -68,11 +110,16 @@ function hook_event_listeners () {
       if (!window.productXrefFound) {
         highlight_similar(link);
       } else {
-        window.paginationXrefFound = true;
+        url = link.href;
+        offset = url.lastIndexOf("2");
+        url = url.substring(0, offset) + url.substring(offset).replace("2", "[0-9]+");
+        console.log(`Regex for pagination: ${url}`);
+        window.localStorage.setItem("pagination_regex", url);
+
         document.querySelector(
           ".swp-tooltip p"
-        ).innerText = `XREF for pagination saved. Redirecting to product page...`;
-        window.location.href = window.productXrefs[0];
+        ).innerText = `Regex for pagination saved. Redirecting to product page...`;
+        window.location.href = window.sampleProductUrl;
       }
     });
   });
@@ -81,11 +128,16 @@ function hook_event_listeners () {
 console.log("Hook'er is active!");
 window.productXrefFound = false;
 
-setInterval(() => {
-  hook_event_listeners();
-}, 1500);
-
 window.addEventListener("load", () => {
+  if (window.localStorage.getItem("product_regex")) {
+    console.log(window.localStorage.getItem("product_regex"), window.localStorage.getItem("pagination_regex"));
+    return;
+  }
+
+  setInterval(() => {
+    hook_event_listeners();
+  }, 1500);
+
   document.body.insertAdjacentHTML(
     "beforeend",
     `<div class="swp-tooltip">
@@ -140,8 +192,8 @@ window.addEventListener("load", () => {
 
   setInterval(() => {
     const tooltip = document.querySelector(".swp-tooltip");
-    tooltip.style.top = `${window.tooltipPositionY + 20  }px`;
-    tooltip.style.left = `${window.tooltipPositionX + 20  }px`;
+    tooltip.style.top = `${window.tooltipPositionY + 20}px`;
+    tooltip.style.left = `${window.tooltipPositionX + 20}px`;
   }, 100);
 
   document.addEventListener("mousemove", (e) => {

@@ -6,8 +6,7 @@
     "manifest_version": 2,
     "permissions": [
         "tabs",
-        "webRequest",
-        "webRequestBlocking",
+        "storage",
         "<all_urls>"
     ],
     "content_scripts": [
