@@ -22,5 +22,14 @@ jobs:
         with:
           python-version: "3.12"
           cache: poetry
-      - run: poetry install --with=prefect --with=dev --with=backend
+      - name: Install dependencies
+        run: poetry install --with=prefect --with=dev --with=backend
+      - name: Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+      - name: Install pnpm
+        run: npm install -g pnpm
+      - name: Install Node dependencies
+        run: pnpm install --frozen-lockfile
       - uses: pre-commit/action@v3.0.0

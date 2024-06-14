@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "eslint": "^9.4.0",
     "eslint-plugin-svelte": "^2.39.3",
     "prettier-plugin-svelte": "^3.2.4"
   }
