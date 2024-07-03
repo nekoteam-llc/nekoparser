@@ -15,6 +15,7 @@ class UserFilledData(BaseModel):
     measure_unit: str = Field(description="measure unit")
     currency: str = Field(description="currency")
     description: str = Field(description="description")
+    properties: str = Field(description="properties")
     main_image: str = Field(description="main image")
 
 

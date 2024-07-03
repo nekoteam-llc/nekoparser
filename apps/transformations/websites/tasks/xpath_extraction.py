@@ -76,6 +76,7 @@ CUSTOM_TRANSFORMERS = {
     "currency": process_arbitrary_string,
     "measure_unit": process_arbitrary_string,
     "description": process_description,
+    "properties": process_description,
 }
 CUSTOM_EXTRACTORS = {
     "main_image": process_image,

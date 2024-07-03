@@ -159,6 +159,7 @@
     "name",
     "description",
     "keywords",
+    "properties",
     "price",
     "currency",
     "measure_unit",
@@ -170,6 +171,7 @@
     name: "Name",
     keywords: "Keywords",
     description: "Description",
+    properties: "Properties",
     price: "Price",
     currency: "Currency",
     measure_unit: "Measure unit",
@@ -282,7 +284,7 @@
             <Table.Row>
               <Table.Cell>{i + 1}</Table.Cell>
               {#each keys as key}
-                {#if key === "description" || key === "keywords"}
+                {#if key === "description" || key === "keywords" || key === "properties"}
                   <Table.Cell>
                     <Popover.Root>
                       <Popover.Trigger>

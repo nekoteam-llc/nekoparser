@@ -127,6 +127,28 @@ function highlightSimilar(link) {
 console.log("%cSWP Plugin is active 🎉", "color: #ff00ff; font-size: 22px;");
 window.productXPATHFound = false;
 
+function pause() {
+  document.querySelector(".swp-highlighter").style.display = "none";
+  document.querySelector(".swp-tooltip").style.display = "none";
+}
+
+function resume() {
+  document.querySelector(".swp-highlighter").style.display = "block";
+  document.querySelector(".swp-tooltip").style.display = "block";
+}
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "p" || e.key == "з") {
+    pause();
+  }
+})
+
+document.addEventListener("keyup", (e) => {
+  if (e.key === "p" || e.key == "з") {
+    resume();
+  }
+})
+
 
 function highlightElement(elem) {
   if (elem === null) return;
