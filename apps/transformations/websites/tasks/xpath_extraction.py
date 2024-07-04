@@ -1,13 +1,16 @@
 import asyncio
 import hashlib
+import inspect
 import re
 from datetime import datetime
+from typing import Any
 from urllib.parse import urlparse
 
 from lxml import etree
 from prefect import flow, task
 from sqlalchemy.dialects.postgresql import insert
 
+from packages.chatgpt import ExtractProperties, NormalizeDescription, chatgpt
 from packages.database import Product, TheSession, WebsiteSource, WebsiteSourceState
 from packages.log import get_logger
 from packages.schemas.satu import UserFilledData
@@ -57,16 +60,43 @@ def process_arbitrary_string(currency: str) -> str:
     return re.sub(r"[^A-Za-zА-Яа-яЁёÀ-ÿ.]", "", currency)
 
 
-def process_description(description: str) -> str:
+def arbitrary_cleanup(text: str) -> str:
     return (
         re.sub(
             r"\n{2,}",
             "\n",
-            description.replace("\t", "").replace("\r", "").strip(),
+            text.replace("\t", "").replace("\r", "").strip(),
         )
         .removeprefix("Описание")
         .strip()
     )
+
+
+async def process_description(description: str) -> str:
+    description = arbitrary_cleanup(description)
+    if not description:
+        return "N/A"
+
+    try:
+        return await chatgpt(NormalizeDescription(description))
+    except Exception as e:
+        get_logger().exception(
+            "Failed to normalize description",
+            extra={"error": str(e)},
+        )
+        return "N/A"
+
+
+async def process_properties(properties: str) -> dict[str, Any]:
+    properties = arbitrary_cleanup(properties)
+    if not properties:
+        return {}
+
+    try:
+        return await chatgpt(ExtractProperties(properties))
+    except Exception as e:
+        get_logger().exception("Failed to extract properties", extra={"error": str(e)})
+        return {}
 
 
 PAGES_CHUNK_SIZE = 5
@@ -76,16 +106,17 @@ CUSTOM_TRANSFORMERS = {
     "currency": process_arbitrary_string,
     "measure_unit": process_arbitrary_string,
     "description": process_description,
-    "properties": process_description,
+    "properties": process_properties,
 }
 CUSTOM_EXTRACTORS = {
     "main_image": process_image,
 }
 MANDATORY_FIELDS = ["name", "price", "currency", "measure_unit", "description"]
+DO_NOT_REPROCESS = ["description", "properties"]
 
 
 @task(name="Extract product info", tags=["lxml"])
-async def extract_product(url: str, props_xpaths: dict[str, str]):
+async def extract_product(url: str, props_xpaths: dict[str, str], exists: bool):
     """
     Extract product info
 
@@ -104,6 +135,9 @@ async def extract_product(url: str, props_xpaths: dict[str, str]):
 
     data = {}
     for field in UserFilledData.model_fields.keys():
+        if exists and field in DO_NOT_REPROCESS:
+            continue
+
         xpath = props_xpaths.get(field)
         if not xpath:
             logger.warning("Failed to extract product info", extra={"url": url})
@@ -124,7 +158,10 @@ async def extract_product(url: str, props_xpaths: dict[str, str]):
             if isinstance(elems, list) and elems:
                 data[field] = "".join(map(str, elems))
                 if field in CUSTOM_TRANSFORMERS:
-                    data[field] = CUSTOM_TRANSFORMERS[field](data[field])
+                    if inspect.iscoroutinefunction(CUSTOM_TRANSFORMERS[field]):
+                        data[field] = await CUSTOM_TRANSFORMERS[field](data[field])
+                    else:
+                        data[field] = CUSTOM_TRANSFORMERS[field](data[field])
             else:
                 if field in MANDATORY_FIELDS:
                     logger.warning("Failed to extract product info", extra={"url": url})
@@ -234,15 +271,27 @@ async def extract_products(id: str):
                 break
 
             product_urls = list(product_urls)
-            chunked_product_urls = [
-                product_urls[i : i + PRODUCTS_CHUNK_SIZE]
-                for i in range(0, len(product_urls), PRODUCTS_CHUNK_SIZE)
+
+            exists = (
+                session.query(Product.url).filter(Product.url.in_(product_urls)).all()
+            )
+            products = [(url, url in exists) for url in product_urls]
+            chunked_products = [
+                products[i : i + PRODUCTS_CHUNK_SIZE]
+                for i in range(0, len(products), PRODUCTS_CHUNK_SIZE)
             ]
             results = []
-            for chunk in chunked_product_urls:
+            for chunk in chunked_products:
                 results.extend(
                     await asyncio.gather(
-                        *[extract_product(url, website.props_xpaths) for url in chunk]
+                        *[
+                            extract_product(
+                                product_info[0],
+                                website.props_xpaths,
+                                product_info[1],
+                            )
+                            for product_info in chunk
+                        ]
                     )
                 )
 

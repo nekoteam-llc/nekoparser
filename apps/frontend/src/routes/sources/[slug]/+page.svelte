@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { json2csv } from "json-2-csv"
   import {
     Braces,
     ExternalLink,
@@ -7,26 +8,25 @@
     Table as TableIcon,
     Trash,
   } from "lucide-svelte"
-  import { toast } from "svelte-sonner"
   import { onMount } from "svelte"
-  import { json2csv } from "json-2-csv"
+  import { toast } from "svelte-sonner"
+  import { dev } from "$app/environment"
   import {
     type GetSourceApiV1SourcesSourceIdGetResponse,
     OpenAPI,
     type Source,
     SourcesAPI,
   } from "$client/index"
-  import BackBtn from "$lib/custom/back-btn.svelte"
-  import StatusTracker from "$lib/custom/status-tracker.svelte"
-  import { Skeleton } from "$lib/components/ui/skeleton"
-  import * as Avatar from "$lib/components/ui/avatar"
   import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js"
-  import { dev } from "$app/environment"
-  import Button from "$lib/components/ui/button/button.svelte"
-  import HotKeys from "$lib/custom/hotkeys.svelte"
-  import * as Table from "$lib/components/ui/table"
-  import * as Popover from "$lib/components/ui/popover"
+  import * as Avatar from "$lib/components/ui/avatar"
   import Badge from "$lib/components/ui/badge/badge.svelte"
+  import Button from "$lib/components/ui/button/button.svelte"
+  import * as Popover from "$lib/components/ui/popover"
+  import { Skeleton } from "$lib/components/ui/skeleton"
+  import * as Table from "$lib/components/ui/table"
+  import BackBtn from "$lib/custom/back-btn.svelte"
+  import HotKeys from "$lib/custom/hotkeys.svelte"
+  import StatusTracker from "$lib/custom/status-tracker.svelte"
 
   if (dev) {
     OpenAPI.BASE = "https://nekoparser-dev.dan.tatar"
@@ -121,7 +121,37 @@
   })
 
   function handleDownloadCSV() {
-    const csv = json2csv(products.map(product => product.data))
+    const csv = json2csv(
+      products.map((product) => {
+        const properties: Record<string, unknown> = {}
+        let current_i = 0
+        if (product.data.properties !== "N/A") {
+          Object.entries(product.data.properties).forEach(([key, value]) => {
+            if (current_i === 0) {
+              properties["Название_Характеристики"] = key
+              properties["Измерение_Характеристики"] = ""
+              properties["Значение_Характеристики"] = value
+              current_i++
+              return
+            }
+            properties[`Название_Характеристики__${current_i}`] = key
+            properties[`Измерение_Характеристики__${current_i}`] = ""
+            properties[`Значение_Характеристики__${current_i}`] = value
+          })
+        }
+        return {
+          Код_товара: product.data.sku,
+          Название_позиции: product.data.name,
+          Поисковые_запросы: product.data.keywords,
+          Описание: product.data.description,
+          Цена: product.data.price,
+          Валюта: product.data.currency,
+          Единица_измерения: product.data.measure_unit,
+          Ссылка_изображения: product.data.main_image,
+          ...properties,
+        }
+      }),
+    )
     const blob = new Blob([csv], { type: "text/csv" })
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
@@ -286,18 +316,35 @@
               {#each keys as key}
                 {#if key === "description" || key === "keywords" || key === "properties"}
                   <Table.Cell>
-                    <Popover.Root>
-                      <Popover.Trigger>
-                        <Button class="h-auto w-full p-1 px-2 text-xs" variant="secondary">
-                          Open
-                        </Button>
-                      </Popover.Trigger>
-                      <Popover.Content class="w-3/4">
-                        {#each product.data[key].split("\n") as line}
-                          <p class="mt-2">{line}</p>
-                        {/each}
-                      </Popover.Content>
-                    </Popover.Root>
+                    {#if product.data[key] !== "N/A"}
+                      <Popover.Root>
+                        <Popover.Trigger>
+                          <Button class="h-auto w-full p-1 px-2 text-xs" variant="secondary">
+                            Open
+                          </Button>
+                        </Popover.Trigger>
+                        <Popover.Content class="max-w-3/4 w-fit">
+                          {#if key === "properties"}
+                            <Table.Root class="w-fit">
+                              <Table.Body>
+                                {#each Object.keys(product.data[key]) as property}
+                                  <Table.Row>
+                                    <Table.Cell>{property}</Table.Cell>
+                                    <Table.Cell>{product.data[key][property]}</Table.Cell>
+                                  </Table.Row>
+                                {/each}
+                              </Table.Body>
+                            </Table.Root>
+                          {:else}
+                            {#each product.data[key].split("\n") as line}
+                              <p class="mt-2">{line}</p>
+                            {/each}
+                          {/if}
+                        </Popover.Content>
+                      </Popover.Root>
+                    {:else}
+                      <p class="mt-2">N/A</p>
+                    {/if}
                   </Table.Cell>
                 {:else if typeof product.data[key] === "string" && (product.data[key].startsWith("http://") || product.data[key].startsWith("https://"))}
                   <Table.Cell>

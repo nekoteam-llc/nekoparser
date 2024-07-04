@@ -4,5 +4,6 @@
 
 <slot />
 
-<img src="/nekologo.png" alt="logo" class="absolute h-8 top-3 right-3 m-auto" />
+<img src="/nekologo.png" alt="logo" class="absolute right-3 top-3 m-auto h-8" />
+
 <style></style>
