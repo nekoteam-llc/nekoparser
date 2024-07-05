@@ -48,3 +48,20 @@ class NormalizeDescription(Prompt):
             raise ChatGPTException("Invalid response from ChatGPT.")
 
         return response["text"]
+
+
+class ExtractKeywords(Prompt):
+    def __init__(self, text: str):
+        self._text = text
+
+    async def generate(self) -> ChatGPTQuery:
+        return ChatGPTQuery(
+            system_message='You are a data scientist. You are given a product description and your goal is to extract the keywords from the text. Respond with a valid JSON object containing a single field - "keywords" with a list of extracted keywords.',
+            user_message=self._text,
+        )
+
+    async def parse_response(self, response: dict) -> list:
+        if "keywords" not in response:
+            raise ChatGPTException("Invalid response from ChatGPT.")
+
+        return response["keywords"]

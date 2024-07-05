@@ -10,7 +10,12 @@ from lxml import etree
 from prefect import flow, task
 from sqlalchemy.dialects.postgresql import insert
 
-from packages.chatgpt import ExtractProperties, NormalizeDescription, chatgpt
+from packages.chatgpt import (
+    ExtractKeywords,
+    ExtractProperties,
+    NormalizeDescription,
+    chatgpt,
+)
 from packages.database import Product, TheSession, WebsiteSource, WebsiteSourceState
 from packages.log import get_logger
 from packages.schemas.satu import UserFilledData
@@ -85,6 +90,18 @@ async def process_description(description: str) -> str:
             extra={"error": str(e)},
         )
         return "N/A"
+
+
+async def process_keywords(text: str) -> str:
+    text = arbitrary_cleanup(text)
+    if not text:
+        return ""
+
+    try:
+        return ", ".join(await chatgpt(ExtractKeywords(text)))
+    except Exception as e:
+        get_logger().exception("Failed to extract keywords", extra={"error": str(e)})
+        return ""
 
 
 async def process_properties(properties: str) -> dict[str, Any]:
@@ -169,9 +186,8 @@ async def extract_product(url: str, props_xpaths: dict[str, str], exists: bool):
 
                 data[field] = "N/A"
 
-    meta_keywords = tree.xpath("//meta[@name='keywords']/@content")
-    if meta_keywords and isinstance(meta_keywords, list) and meta_keywords[0]:
-        data["keywords"] = meta_keywords[0]
+    if data.get("description") and data.get("description") != "N/A":
+        data["keywords"] = await process_keywords(data["description"])
     else:
         data["keywords"] = "N/A"
 
