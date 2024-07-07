@@ -9,6 +9,9 @@ stages:
   - sonarqube-check
   - sonarqube-vulnerability-report
 
+before_script:
+  - echo $DOCKER_REGISTRY_PASSWORD | docker login --username $DOCKER_REGISTRY_USER --password-stdin
+
 sonarqube-check:
   stage: sonarqube-check
   cache:
