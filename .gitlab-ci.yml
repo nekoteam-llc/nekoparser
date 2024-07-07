@@ -1,5 +1,5 @@
 image: 
-    name: sonarsource/sonar-scanner-cli:latest
+    name: gcr.io/sonarsource/sonar-scanner-cli:latest
     entrypoint: [""]
 
 variables:
