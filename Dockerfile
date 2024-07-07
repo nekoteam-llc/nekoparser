@@ -1,5 +1,5 @@
 # See https://github.com/python-poetry/poetry/discussions/1879
-FROM python:3.12.3 as python-base
+FROM python:3.12.3 AS python-base
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=off \
@@ -14,7 +14,7 @@ ENV PYTHONUNBUFFERED=1 \
 
 ENV PATH="$POETRY_HOME/bin:$VENV_PATH/bin:$PATH"
 
-FROM python-base as builder-base
+FROM python-base AS builder-base
 RUN apt-get update && apt-get install --no-install-recommends -y \
     curl \
     build-essential
@@ -26,7 +26,7 @@ COPY poetry.lock pyproject.toml ./
 
 RUN poetry install --without dev
 
-FROM python-base as production
+FROM python-base AS production
 COPY --from=builder-base $PYSETUP_PATH $PYSETUP_PATH
 
 WORKDIR /opt/nekoparser
