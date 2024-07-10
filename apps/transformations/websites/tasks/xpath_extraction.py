@@ -233,7 +233,9 @@ async def extract_products(id: str):
         base_url = f"{urlparse(website.url).scheme}://{urlparse(website.url).hostname}"
         pagination = website.pagination_regex
 
-        pagination_regex = re.escape(pagination).replace(r"%swp\-pagination%", r"(\d+)")
+        pagination_regex = re.escape(pagination).replace(
+            r"%swp\-new\-pagination%", r"(\d+)"
+        )
         if pagination_regex.startswith("http"):
             pagination_regex = re.sub(
                 r"(https?://[^/]+)",
@@ -259,7 +261,7 @@ async def extract_products(id: str):
 
             tasks = []
             for _ in range(global_config.pages_concurrency):
-                url = pagination.replace(r"%swp-pagination%", str(current_page))
+                url = pagination.replace(r"%swp-new-pagination%", str(current_page))
                 logger.info("Adding page to queue", extra={"url": url})
                 tasks.append(scrape_website(url))
                 current_page += 1
