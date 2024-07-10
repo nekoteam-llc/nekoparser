@@ -1,4 +1,5 @@
 from .transformations import (
+    Config,
     FileSource,
     FileType,
     Product,
@@ -6,4 +7,11 @@ from .transformations import (
     WebsiteSourceState,
 )
 
-__all__ = ["FileSource", "FileType", "Product", "WebsiteSource", "WebsiteSourceState"]
+__all__ = [
+    "FileSource",
+    "FileType",
+    "Product",
+    "WebsiteSource",
+    "WebsiteSourceState",
+    "Config",
+]

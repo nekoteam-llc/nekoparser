@@ -3,7 +3,7 @@
 
 from prefect import serve
 
-from .websites.pipeline import extract_products, initial_processing
+from .websites.pipeline import extract_products, initial_processing, reprocess_products
 
 
 def serve_all():
@@ -18,6 +18,10 @@ def serve_all():
         ),
         extract_products.to_deployment(
             name=extract_products.name,
+            tags=["websites"],
+        ),
+        reprocess_products.to_deployment(
+            name=reprocess_products.name,
             tags=["websites"],
         ),
     )

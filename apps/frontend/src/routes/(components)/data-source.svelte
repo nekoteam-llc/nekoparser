@@ -33,9 +33,7 @@
 </script>
 
 <a href="/sources/{id}">
-  <Card.Root
-    class="flex flex-col space-y-4 shadow-sm shadow-transparent transition-shadow hover:shadow-purple-950"
-  >
+  <Card.Root class="flex flex-col space-y-4 shadow-sm shadow-transparent transition-shadow hover:shadow-purple-950">
     <Card.Header>
       <div class="flex items-center space-x-2">
         <Avatar.Root class="h-6 w-6">
@@ -50,16 +48,8 @@
         {description.substring(0, 100)}{description.length > 100 ? "..." : ""}
       </p>
     </Card.Header>
-    <Card.Content
-      class="flex items-center space-x-2 {state === "xpaths_pending"
-        || state === "data_pending_approval"
-        ? "pb-0"
-        : ""}"
-    >
-      <Badge
-        variant={state === "unavailable" ? "destructive" : "default"}
-        class={state === "finished" ? "bg-emerald-700 text-white" : ""}
-      >
+    <Card.Content class="flex items-center space-x-2 {state === "xpaths_pending" || state === "data_pending_approval" ? "pb-0" : ""}">
+      <Badge variant={state === "unavailable" ? "destructive" : "default"} class={state === "finished" ? "bg-emerald-700 text-white" : ""}>
         {state.replaceAll("_", "\xA0")}
       </Badge>
       <Progress value={statusToProgress(state)} />

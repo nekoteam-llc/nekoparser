@@ -54,16 +54,16 @@ function buildURLRegex(urls) {
 }
 
 function highlightSimilar(link) {
-  if (document.querySelector(".swp-button") !== null) {
-    document.querySelector(".swp-button").remove();
+  if (document.querySelector(".swp-new-button") !== null) {
+    document.querySelector(".swp-new-button").remove();
   }
   url = link.href;
   const path_component = url.startsWith("/")
     ? url.split("/")[1]
     : url.split("/")[3];
   current_elem = link.parentNode;
-  document.querySelectorAll(".swp-highlighted").forEach((elem) => {
-    elem.classList.remove("swp-highlighted");
+  document.querySelectorAll(".swp-new-highlighted").forEach((elem) => {
+    elem.classList.remove("swp-new-highlighted");
   });
   while (true) {
     if (current_elem.tagName === "BODY") {
@@ -79,20 +79,20 @@ function highlightSimilar(link) {
     if (current_similar >= 10) {
       for (let i = 0; i < current_links.length; i++) {
         if (current_links[i].href.includes(path_component)) {
-          current_links[i].classList.add("swp-highlighted");
+          current_links[i].classList.add("swp-new-highlighted");
         }
       }
       document.body.insertAdjacentHTML(
         "beforeend",
-        `<div class="swp-button">
+        `<div class="swp-new-button">
           Confirm
         </div>`
       );
 
-      document.querySelector(".swp-button").addEventListener("click", () => {
+      document.querySelector(".swp-new-button").addEventListener("click", () => {
         window.productXPATHFound = true;
         urls = [];
-        document.querySelectorAll(".swp-highlighted").forEach((elem) => {
+        document.querySelectorAll(".swp-new-highlighted").forEach((elem) => {
           if (!urls.includes(elem.href)) {
             urls.push(elem.href);
           }
@@ -103,20 +103,20 @@ function highlightSimilar(link) {
 
         window.localStorage.setItem("product_regex", url_string);
 
-        document.querySelector(".swp-button").remove();
+        document.querySelector(".swp-new-button").remove();
         document.querySelector(
-          ".swp-tooltip p"
+          ".swp-new-tooltip p"
         ).innerText = `Regex for products saved. Now try to go to the second page.`;
-        window.localStorage.setItem("swp-state", "pagination");
-        document.querySelector(".swp-highlighter").style.display = "block";
+        window.localStorage.setItem("swp-new-state", "pagination");
+        document.querySelector(".swp-new-highlighter").style.display = "block";
 
-        document.querySelectorAll(".swp-highlighted").forEach((elem) => {
-          elem.classList.remove("swp-highlighted");
+        document.querySelectorAll(".swp-new-highlighted").forEach((elem) => {
+          elem.classList.remove("swp-new-highlighted");
         });
       });
 
       document.querySelector(
-        ".swp-tooltip p"
+        ".swp-new-tooltip p"
       ).innerText = `If the products were highlighted correctly, click on the button in the top of the page. If not, open the product again.`;
       break;
     }
@@ -128,13 +128,13 @@ console.log("%cSWP Plugin is active 🎉", "color: #ff00ff; font-size: 22px;");
 window.productXPATHFound = false;
 
 function pause() {
-  document.querySelector(".swp-highlighter").style.display = "none";
-  document.querySelector(".swp-tooltip").style.display = "none";
+  document.querySelector(".swp-new-highlighter").style.display = "none";
+  document.querySelector(".swp-new-tooltip").style.display = "none";
 }
 
 function resume() {
-  document.querySelector(".swp-highlighter").style.display = "block";
-  document.querySelector(".swp-tooltip").style.display = "block";
+  document.querySelector(".swp-new-highlighter").style.display = "block";
+  document.querySelector(".swp-new-tooltip").style.display = "block";
 }
 
 document.addEventListener("keydown", (e) => {
@@ -152,7 +152,7 @@ document.addEventListener("keyup", (e) => {
 
 function highlightElement(elem) {
   if (elem === null) return;
-  const highlighter = document.querySelector(".swp-highlighter");
+  const highlighter = document.querySelector(".swp-new-highlighter");
   if (elem.offsetWidth <= 0 || elem.offsetHeight <= 0) {
     return;
   }
@@ -166,20 +166,20 @@ function highlightElement(elem) {
 function injectTooltip() {
   document.body.insertAdjacentHTML(
     "beforeend",
-    `<div class="swp-tooltip">
+    `<div class="swp-new-tooltip">
       <p></p>
     </div>`
   );
 
   setInterval(() => {
-    const tooltip = document.querySelector(".swp-tooltip");
+    const tooltip = document.querySelector(".swp-new-tooltip");
     tooltip.style.top = `${window.tooltipPositionY + 20}px`;
     tooltip.style.left = `${window.tooltipPositionX + 20}px`;
   }, 100);
 }
 
 function processHighlighter(e) {
-  document.querySelector(".swp-highlighter").style.opacity = "1";
+  document.querySelector(".swp-new-highlighter").style.opacity = "1";
 
   window.tooltipPositionX = e.pageX;
   window.tooltipPositionY = e.pageY;
@@ -187,7 +187,7 @@ function processHighlighter(e) {
   const elems = document.elementsFromPoint(e.clientX, e.clientY);
   let elem = null;
   for (let i = 0; i < elems.length; i++) {
-    if (elems[i].classList.contains("swp-highlighter")) {
+    if (elems[i].classList.contains("swp-new-highlighter")) {
       continue;
     }
     elem = elems[i];
@@ -231,22 +231,22 @@ function getXPath(element) {
 function injectHighlighter() {
   document.body.insertAdjacentHTML(
     "beforeend",
-    `<div class="swp-highlighter"></div>`
+    `<div class="swp-new-highlighter"></div>`
   );
 
-  document.querySelector(".swp-highlighter").addEventListener("click", (e) => {
+  document.querySelector(".swp-new-highlighter").addEventListener("click", (e) => {
     const elems = document.elementsFromPoint(e.clientX, e.clientY);
     let elem = null;
     for (let i = 0; i < elems.length; i++) {
-      if (elems[i].classList.contains("swp-highlighter")) {
+      if (elems[i].classList.contains("swp-new-highlighter")) {
         continue;
       }
       elem = elems[i];
       break;
     }
     console.log(elem);
-    if (window.localStorage.getItem("swp-state") === "product") {
-      document.querySelector(".swp-highlighter").style.display = "none";
+    if (window.localStorage.getItem("swp-new-state") === "product") {
+      document.querySelector(".swp-new-highlighter").style.display = "none";
       if (elem.tagName !== "A") {
         elem = elem.closest("a");
       }
@@ -255,8 +255,8 @@ function injectHighlighter() {
       }
 
       highlightSimilar(elem);
-    } else if (window.localStorage.getItem("swp-state") === "pagination") {
-      document.querySelector(".swp-highlighter").style.display = "none";
+    } else if (window.localStorage.getItem("swp-new-state") === "pagination") {
+      document.querySelector(".swp-new-highlighter").style.display = "none";
       if (elem.tagName !== "A") {
         elem = elem.closest("a");
       }
@@ -266,25 +266,25 @@ function injectHighlighter() {
 
       url = elem.href;
       offset = url.lastIndexOf("2");
-      url = url.substring(0, offset) + url.substring(offset).replace("2", "%swp-pagination%");
+      url = url.substring(0, offset) + url.substring(offset).replace("2", "%swp-new-pagination%");
       console.log(`Regex for pagination: ${url}`);
       window.localStorage.setItem("pagination_regex", url);
 
       document.querySelector(
-        ".swp-tooltip p"
+        ".swp-new-tooltip p"
       ).innerHTML = `Regex for pagination saved. Please, open the product <u>with the discount</u>`;
 
-      window.localStorage.setItem("swp-state", "product-page");
-    } else if (window.localStorage.getItem("swp-state") === "product-page") {
+      window.localStorage.setItem("swp-new-state", "product-page");
+    } else if (window.localStorage.getItem("swp-new-state") === "product-page") {
       window.knownProperties.push({
         property: window.availableProperties[0].name,
         xpath: getXPath(elem),
       });
       window.availableProperties.shift();
       if (window.availableProperties.length === 0) {
-        document.querySelector(".swp-highlighter").style.display = "none";
+        document.querySelector(".swp-new-highlighter").style.display = "none";
         document.querySelector(
-          ".swp-tooltip p"
+          ".swp-new-tooltip p"
         ).innerText = `All properties were selected. Redirecting back to the main page...`;
         fetch(`https://nekoparser.dan.tatar/api/v1/connector/sources/${window.sourceId}`, {
           method: "POST",
@@ -304,7 +304,7 @@ function injectHighlighter() {
             window.location.href = "https://nekoparser.dan.tatar";
           } else {
             document.querySelector(
-              ".swp-tooltip p"
+              ".swp-new-tooltip p"
             ).innerText = `Error while saving the properties. Try again.`;
           }
         });
@@ -314,7 +314,7 @@ function injectHighlighter() {
   });
 
   document.addEventListener("scroll", () => {
-    document.querySelector(".swp-highlighter").style.opacity = "0";
+    document.querySelector(".swp-new-highlighter").style.opacity = "0";
   });
 
   document.addEventListener("mousemove", (e) => {
@@ -327,13 +327,13 @@ function injectStyles() {
     "beforeend",
     `<style>
       @import url("https://fonts.googleapis.com/css2?family=Hubballi&display=swap");
-      a.swp-highlighted {
+      a.swp-new-highlighted {
         background: rgba(50, 0, 0, 0.1);
         border: 1px solid rgba(50, 0, 0, 0.3);
         border-radius: 5px;
       }
 
-      .swp-tooltip {
+      .swp-new-tooltip {
         width: fit-content;
         height: fit-content;
         background: #111;
@@ -348,12 +348,12 @@ function injectStyles() {
         z-index: 1000;
       }
 
-      .swp-tooltip p {
+      .swp-new-tooltip p {
         margin: 0;
         color: #f2f2f2;
       }
 
-      .swp-button {
+      .swp-new-button {
         position: fixed;
         top: 0;
         left: 0;
@@ -367,7 +367,7 @@ function injectStyles() {
         z-index: 1000;
       }
 
-      .swp-highlighter {
+      .swp-new-highlighter {
         position: fixed;
         top: 0;
         left: 0;
@@ -385,14 +385,14 @@ function initOnMainPage() {
   injectTooltip();
   injectStyles();
 
-  document.querySelector(".swp-tooltip p").innerText = `Open any product.`;
-  window.localStorage.setItem("swp-state", "product");
+  document.querySelector(".swp-new-tooltip p").innerText = `Open any product.`;
+  window.localStorage.setItem("swp-new-state", "product");
 
   injectHighlighter();
 }
 
 function selectProperty(property, description) {
-  document.querySelector(".swp-tooltip p").innerHTML = `Select the <u>${description}</u>.`;
+  document.querySelector(".swp-new-tooltip p").innerHTML = `Select the <u>${description}</u>.`;
 }
 
 function initOnProductPage() {
@@ -414,17 +414,13 @@ function checkIfOnMainPage() {
   const regex = new RegExp(window.localStorage.getItem("product_regex"));
   console.log(regex);
   if (!regex.test(window.location.href)) {
-    const links = document.querySelectorAll("a");
-    links.forEach((link) => {
-      if (regex.test(link.href)) {
-        window.location.href = link.href;
-      }
-    });
+    window.localStorage.setItem("swp-new-state", "product");
+    initOnMainPage();
   }
 }
 
 function initPluginVerified() {
-  if (window.localStorage.getItem("swp-state") !== "product-page") {
+  if (window.localStorage.getItem("swp-new-state") !== "product-page") {
     initOnMainPage();
     return
   }

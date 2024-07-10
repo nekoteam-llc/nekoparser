@@ -11,9 +11,6 @@
 	export { className as class };
 </script>
 
-<DropdownMenuPrimitive.Label
-	class={cn('px-2 py-1.5 text-sm font-semibold', inset && 'pl-8', className)}
-	{...$$restProps}
->
+<DropdownMenuPrimitive.Label class={cn('px-2 py-1.5 text-sm font-semibold', inset && 'pl-8', className)} {...$$restProps}>
 	<slot />
 </DropdownMenuPrimitive.Label>

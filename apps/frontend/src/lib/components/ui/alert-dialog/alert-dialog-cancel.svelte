@@ -10,12 +10,6 @@
 	export { className as class };
 </script>
 
-<AlertDialogPrimitive.Cancel
-	class={cn(buttonVariants({ variant: 'outline' }), 'mt-2 sm:mt-0', className)}
-	{...$$restProps}
-	on:click
-	on:keydown
-	let:builder
->
+<AlertDialogPrimitive.Cancel class={cn(buttonVariants({ variant: 'outline' }), 'mt-2 sm:mt-0', className)} {...$$restProps} on:click on:keydown let:builder>
 	<slot {builder} />
 </AlertDialogPrimitive.Cancel>

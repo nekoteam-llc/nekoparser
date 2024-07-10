@@ -3,8 +3,11 @@ from urllib.parse import urlparse
 from fastapi import APIRouter, HTTPException, WebSocket
 from pydantic import BaseModel
 
-from packages.database import TheSession, WebsiteSource
-from transformations.websites.connector import schedule_initial_processing
+from packages.database import Product, TheSession, WebsiteSource
+from transformations.websites.connector import (
+    schedule_initial_processing,
+    schedule_reprocessing,
+)
 
 from .source_manager import Source, source_manager
 
@@ -24,6 +27,10 @@ class SourceCreateResponse(BaseModel):
 
 class MessageResponse(BaseModel):
     message: str
+
+
+class ReprocessRequest(BaseModel):
+    products: list[str]
 
 
 @router.get("/")
@@ -108,6 +115,29 @@ async def reload_sources() -> MessageResponse:
 
     await source_manager.reload_sources()
     return MessageResponse(message="The sources have been reloaded")
+
+
+@router.post("/reprocess")
+async def reprocess_products(data: ReprocessRequest) -> MessageResponse:
+    """
+    Reprocess the products
+    """
+
+    with TheSession() as session:
+        for product_id in data.products:
+            if not (
+                product := session.query(Product).filter(Product.id == product_id).first()
+            ):
+                raise HTTPException(status_code=404, detail="Product not found")
+
+            product.reprocessing = True
+
+        session.commit()
+        await source_manager.reload_sources()
+
+    await schedule_reprocessing()
+
+    return MessageResponse(message="Scheduled.")
 
 
 @router.websocket("/wss")

@@ -72,9 +72,7 @@
   >
     {#each Array.from({ length: 3 }) as _, i}
       <div
-        class="h-1 w-1 rounded-full {dark
-          ? "bg-slate-gray-600"
-          : "bg-zinc-700"} ease animate-bounce"
+        class="h-1 w-1 rounded-full {dark ? "bg-slate-gray-600" : "bg-zinc-700"} ease animate-bounce"
         style="animation-delay: {i * 0.1}s; animation-duration: 900ms;"
       ></div>
     {/each}
@@ -91,18 +89,14 @@
           {key}
           on:hot={() => hot(key)}
           on:not={() => not(key)}
-          class="{i > 0 ? "pl-1" : ""} {i < keys.length - 1
-            ? "rounded-br-none rounded-tr-none border-r-0 pr-0"
-            : "rounded-bl-none rounded-tl-none border-l-0"}"
+          class="{i > 0 ? "pl-1" : ""} {i < keys.length - 1 ? "rounded-br-none rounded-tr-none border-r-0 pr-0" : "rounded-bl-none rounded-tl-none border-l-0"}"
         >
           {key}
         </HotKey>
       {:else}
         <HotKey
           {key}
-          class="{i > 0 ? "pl-1" : ""} {i < keys.length - 1
-            ? "rounded-br-none rounded-tr-none border-r-0 pr-0"
-            : "rounded-bl-none rounded-tl-none border-l-0"}"
+          class="{i > 0 ? "pl-1" : ""} {i < keys.length - 1 ? "rounded-br-none rounded-tr-none border-r-0 pr-0" : "rounded-bl-none rounded-tl-none border-l-0"}"
         >
           {key}
         </HotKey>

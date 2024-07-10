@@ -4,6 +4,9 @@ import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
 import type {
+	GetConfigApiV1ConfigGetResponse,
+	UpdateConfigApiV1ConfigPutData,
+	UpdateConfigApiV1ConfigPutResponse,
 	GetActiveSourcesApiV1ConnectorSourcesGetResponse,
 	GetPropertiesApiV1ConnectorPropertiesGetResponse,
 	UpdateSourceXpathsApiV1ConnectorSourcesSourceIdPostData,
@@ -16,8 +19,45 @@ import type {
 	GetSourceApiV1SourcesSourceIdGetResponse,
 	DeleteSourceApiV1SourcesSourceIdDeleteData,
 	DeleteSourceApiV1SourcesSourceIdDeleteResponse,
-	ReloadSourcesApiV1SourcesReloadPostResponse
+	ReloadSourcesApiV1SourcesReloadPostResponse,
+	ReprocessProductsApiV1SourcesReprocessPostData,
+	ReprocessProductsApiV1SourcesReprocessPostResponse
 } from './types.gen';
+
+export class ConfigAPI {
+	/**
+	 * Get Config
+	 * Get the current configuration.
+	 * @returns ConfigModel Successful Response
+	 * @throws ApiError
+	 */
+	public static get(): CancelablePromise<GetConfigApiV1ConfigGetResponse> {
+		return __request(OpenAPI, {
+			method: 'GET',
+			url: '/api/v1/config/'
+		});
+	}
+
+	/**
+	 * Update Config
+	 * Update the configuration.
+	 * @param data The data for the request.
+	 * @param data.requestBody
+	 * @returns ConfigModel Successful Response
+	 * @throws ApiError
+	 */
+	public static update(data: UpdateConfigApiV1ConfigPutData): CancelablePromise<UpdateConfigApiV1ConfigPutResponse> {
+		return __request(OpenAPI, {
+			method: 'PUT',
+			url: '/api/v1/config/',
+			body: data.requestBody,
+			mediaType: 'application/json',
+			errors: {
+				422: 'Validation Error'
+			}
+		});
+	}
+}
 
 export class ConnectorAPI {
 	/**
@@ -110,9 +150,7 @@ export class SourcesAPI {
 	 * @returns SourceCreateResponse Successful Response
 	 * @throws ApiError
 	 */
-	public static createSource(
-		data: CreateSourceApiV1SourcesPostData
-	): CancelablePromise<CreateSourceApiV1SourcesPostResponse> {
+	public static createSource(data: CreateSourceApiV1SourcesPostData): CancelablePromise<CreateSourceApiV1SourcesPostResponse> {
 		return __request(OpenAPI, {
 			method: 'POST',
 			url: '/api/v1/sources/',
@@ -133,9 +171,7 @@ export class SourcesAPI {
 	 * @returns Source Successful Response
 	 * @throws ApiError
 	 */
-	public static getSource(
-		data: GetSourceApiV1SourcesSourceIdGetData
-	): CancelablePromise<GetSourceApiV1SourcesSourceIdGetResponse> {
+	public static getSource(data: GetSourceApiV1SourcesSourceIdGetData): CancelablePromise<GetSourceApiV1SourcesSourceIdGetResponse> {
 		return __request(OpenAPI, {
 			method: 'GET',
 			url: '/api/v1/sources/{source_id}',
@@ -156,9 +192,7 @@ export class SourcesAPI {
 	 * @returns MessageResponse Successful Response
 	 * @throws ApiError
 	 */
-	public static deleteSource(
-		data: DeleteSourceApiV1SourcesSourceIdDeleteData
-	): CancelablePromise<DeleteSourceApiV1SourcesSourceIdDeleteResponse> {
+	public static deleteSource(data: DeleteSourceApiV1SourcesSourceIdDeleteData): CancelablePromise<DeleteSourceApiV1SourcesSourceIdDeleteResponse> {
 		return __request(OpenAPI, {
 			method: 'DELETE',
 			url: '/api/v1/sources/{source_id}',
@@ -181,6 +215,26 @@ export class SourcesAPI {
 		return __request(OpenAPI, {
 			method: 'POST',
 			url: '/api/v1/sources/reload'
+		});
+	}
+
+	/**
+	 * Reprocess Products
+	 * Reprocess the products
+	 * @param data The data for the request.
+	 * @param data.requestBody
+	 * @returns MessageResponse Successful Response
+	 * @throws ApiError
+	 */
+	public static reprocessProducts(data: ReprocessProductsApiV1SourcesReprocessPostData): CancelablePromise<ReprocessProductsApiV1SourcesReprocessPostResponse> {
+		return __request(OpenAPI, {
+			method: 'POST',
+			url: '/api/v1/sources/reprocess',
+			body: data.requestBody,
+			mediaType: 'application/json',
+			errors: {
+				422: 'Validation Error'
+			}
 		});
 	}
 }

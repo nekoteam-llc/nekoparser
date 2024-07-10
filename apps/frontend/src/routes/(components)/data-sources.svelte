@@ -34,13 +34,7 @@
 <div class="grid grid-cols-3 gap-4">
   {#if sources !== undefined}
     {#each sources ?? [] as source}
-      <DataSource
-        id={source.id}
-        icon={source.icon}
-        title={source.title}
-        description={source.description}
-        state={source.state}
-      />
+      <DataSource id={source.id} icon={source.icon} title={source.title} description={source.description} state={source.state} />
     {/each}
   {:else}
     {#each Array.from({ length: 6 }) as _}

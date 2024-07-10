@@ -14,9 +14,7 @@ export default defineConfig({
     asClass: true,
     operationId: true,
     methodNameBuilder: (service: string, operationId: string) => {
-      const strippedApi = operationId.includes("ApiV1")
-        ? operationId.split("ApiV1")[0]
-        : operationId
+      const strippedApi = operationId.includes("ApiV1") ? operationId.split("ApiV1")[0] : operationId
 
       return strippedApi.endsWith(service) ? strippedApi.slice(0, -service.length) : strippedApi
     },

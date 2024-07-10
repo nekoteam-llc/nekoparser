@@ -119,13 +119,13 @@
       return false
     switch (hotKey) {
       case "Alt":
-        return altKey
+        return altKey || event.key === "Alt"
       case "Control":
-        return ctrlKey
+        return ctrlKey || event.key === "Control"
       case "Meta":
-        return metaKey
+        return metaKey || event.key === "Meta"
       case "Shift":
-        return shiftKey
+        return shiftKey || event.key === "Shift"
     }
     return isHotKey
   }

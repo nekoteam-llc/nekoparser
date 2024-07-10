@@ -7,8 +7,6 @@ x-config-env: &config-env
   DB_PASSWORD: ${POSTGRES_PASSWORD}
   BACKEND_URL: http://backend:31228
   LOG_LEVEL: WARNING
-  CHATGPT_API_KEY: ${CHATGPT_API_KEY}
-  CHATGPT_API_URL: ${CHATGPT_API_URL}
 
 services:
   backend:

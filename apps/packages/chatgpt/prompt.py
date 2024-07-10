@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
+from packages.database import Config, TheSession
+
 from .exceptions import ChatGPTException
 from .models import ChatGPTQuery
 
@@ -19,13 +21,18 @@ class Prompt(ABC):
         pass
 
 
+def get_config() -> Config:
+    with TheSession() as session:
+        return session.query(Config).one()
+
+
 class ExtractProperties(Prompt):
     def __init__(self, keywords: str):
         self._keywords = keywords
 
     async def generate(self) -> ChatGPTQuery:
         return ChatGPTQuery(
-            system_message='You are a data scientist. You are given the set of data from the website and your goal is to extract the properties of the product from the text. You must respond with a valid JSON object, containing the dictionary of the extracted properties. For example: {"color": "red", "size": "small"}.',
+            system_message=get_config().properties_prompt,
             user_message=self._keywords,
         )
 
@@ -39,7 +46,7 @@ class NormalizeDescription(Prompt):
 
     async def generate(self) -> ChatGPTQuery:
         return ChatGPTQuery(
-            system_message='You are a data scientist. You are given a product description and your goal is to normalize the text. Remove any shop-specific parts, keep only the relevant information and technical specs of the product to showcase to the customer. Respond with a valid JSON object containing a single field - "text" with the normalized text.',
+            system_message=get_config().description_prompt,
             user_message=self._description,
         )
 
@@ -56,7 +63,7 @@ class ExtractKeywords(Prompt):
 
     async def generate(self) -> ChatGPTQuery:
         return ChatGPTQuery(
-            system_message='You are a data scientist. You are given a product description and your goal is to extract the keywords from the text. Respond with a valid JSON object containing a single field - "keywords" with a list of extracted keywords.',
+            system_message=get_config().keywords_prompt,
             user_message=self._text,
         )
 

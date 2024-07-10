@@ -3,6 +3,8 @@ from typing import Any
 
 import aiohttp
 
+from packages.database import Config, TheSession
+
 from .config import config
 from .exceptions import ChatGPTException
 from .models import ChatGPTQuery
@@ -11,21 +13,26 @@ from .prompt import Prompt
 
 class ChatGPTClient:
     def __init__(self):
-        self.api_key = config.chatgpt_api_key
         self.api_url = config.chatgpt_api_url
 
     async def _request(self, query: ChatGPTQuery) -> dict:
+        with TheSession() as session:
+            global_config = session.query(Config).one()
+
         async with aiohttp.ClientSession() as session:
             async with session.post(
                 self.api_url,
                 json={
-                    "max_tokens": 3000,
-                    "llm_model": config.chatgpt_model,
-                    "json_only": True,
-                    **query.model_dump(),
+                    "model": global_config.model,
+                    "response_format": {"type": "json_object"},
+                    "messages": [
+                        {"role": "system", "content": query.system_message},
+                        {"role": "user", "content": query.user_message},
+                    ],
+                    "temperature": 0.1,
                 },
                 headers={
-                    "X-API-Key": self.api_key,
+                    "Authorization": f"Bearer {global_config.chatgpt_key}",
                     "Content-Type": "application/json",
                 },
             ) as response:

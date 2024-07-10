@@ -33,7 +33,9 @@ class SourceManager:
         """
 
         with TheSession() as session:
-            sources = session.query(WebsiteSource).all()
+            sources = (
+                session.query(WebsiteSource).order_by(WebsiteSource.url.desc()).all()
+            )
             self._sources = [
                 Source(
                     id=source.id,
@@ -104,7 +106,12 @@ class SourceManager:
         :return: The products or None
         """
         with TheSession() as session:
-            return session.query(Product).filter(Product.source_id == source_id).all()
+            return (
+                session.query(Product)
+                .filter(Product.source_id == source_id)
+                .order_by(Product.url.desc())
+                .all()
+            )
 
     async def _ocassional_reloads(self):
         """

@@ -7,9 +7,9 @@ from packages.database import TheSession, WebsiteSource, WebsiteSourceState
 from transformations.utils import reload_sources
 
 from .tasks import extract_website_meta, scrape_website
-from .tasks.xpath_extraction import extract_products
+from .tasks.xpath_extraction import extract_products, reprocess_products
 
-__all__ = ["initial_processing", "extract_products"]
+__all__ = ["initial_processing", "extract_products", "reprocess_products"]
 
 
 @flow(name="Initial Website Processing", log_prints=True)

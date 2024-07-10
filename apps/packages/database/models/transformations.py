@@ -1,7 +1,7 @@
 import enum
 import uuid
 
-from sqlalchemy import DateTime, Enum, Text
+from sqlalchemy import Boolean, DateTime, Enum, Integer, Text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import mapped_column
 
@@ -157,4 +157,71 @@ class Product(Base):
     source_id = mapped_column(
         UUID(as_uuid=False),
         comment="The UUID of the source",
+    )
+    reprocessing = mapped_column(
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default="false",
+        comment="Whether the product is being reprocessed",
+    )
+
+
+class Config(Base):
+    """
+    Represents the configuration
+    """
+
+    __tablename__ = "config"
+
+    id = mapped_column(
+        UUID(as_uuid=False),
+        primary_key=True,
+        default=lambda: str(uuid.uuid4()),
+        nullable=False,
+    )
+    chatgpt_key = mapped_column(
+        Text,
+        nullable=False,
+        comment="The ChatGPT API key",
+    )
+    model = mapped_column(
+        Text,
+        nullable=False,
+        comment="The model to use for the ChatGPT",
+    )
+    pages_concurrency = mapped_column(
+        Integer,
+        nullable=False,
+        comment="The number of concurrent pages to scrape",
+    )
+    products_concurrency = mapped_column(
+        Integer,
+        nullable=False,
+        comment="The number of concurrent products to scrape",
+    )
+    required = mapped_column(
+        JSONB,
+        nullable=False,
+        comment="The required fields for the product",
+    )
+    not_reprocess = mapped_column(
+        JSONB,
+        nullable=False,
+        comment="The fields that should not be reprocessed",
+    )
+    description_prompt = mapped_column(
+        Text,
+        nullable=False,
+        comment="The prompt for the description",
+    )
+    keywords_prompt = mapped_column(
+        Text,
+        nullable=False,
+        comment="The prompt for the keywords",
+    )
+    properties_prompt = mapped_column(
+        Text,
+        nullable=False,
+        comment="The prompt for the properties",
     )
