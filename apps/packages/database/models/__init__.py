@@ -1,15 +1,15 @@
 from .transformations import (
     Config,
-    FileSource,
-    FileType,
+    ExcelSource,
+    ExcelSourceState,
     Product,
     WebsiteSource,
     WebsiteSourceState,
 )
 
 __all__ = [
-    "FileSource",
-    "FileType",
+    "ExcelSource",
+    "ExcelSourceState",
     "Product",
     "WebsiteSource",
     "WebsiteSourceState",

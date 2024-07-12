@@ -11,7 +11,13 @@
 	export let errorClasses: $$Props['class'] = undefined;
 </script>
 
-<FormPrimitive.FieldErrors class={cn('text-[0.8rem] font-medium text-destructive', className)} {...$$restProps} let:errors let:fieldErrorsAttrs let:errorAttrs>
+<FormPrimitive.FieldErrors
+	class={cn('text-[0.8rem] font-medium text-destructive', className)}
+	{...$$restProps}
+	let:errors
+	let:fieldErrorsAttrs
+	let:errorAttrs
+>
 	<slot {errors} {fieldErrorsAttrs} {errorAttrs}>
 		{#each errors as error}
 			<div {...errorAttrs} class={cn(errorClasses)}>{error}</div>

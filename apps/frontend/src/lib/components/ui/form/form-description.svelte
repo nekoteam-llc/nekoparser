@@ -7,6 +7,10 @@
 	export { className as class };
 </script>
 
-<FormPrimitive.Description class={cn('text-[0.8rem] text-muted-foreground', className)} {...$$restProps} let:descriptionAttrs>
+<FormPrimitive.Description
+	class={cn('text-[0.8rem] text-muted-foreground', className)}
+	{...$$restProps}
+	let:descriptionAttrs
+>
 	<slot {descriptionAttrs} />
 </FormPrimitive.Description>

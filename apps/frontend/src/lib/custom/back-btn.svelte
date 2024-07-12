@@ -8,7 +8,7 @@
   }
 </script>
 
-<Button variant="default" on:click={back} class="my-2 {$$props.class}">
+<Button variant="default" on:click={back} class="my-2 pr-2 {$$props.class}">
   <ArrowBigLeft class="mr-1.5 h-4 w-4" />
   Back
   <HotKeys keys={["z"]} on:hot={back} />

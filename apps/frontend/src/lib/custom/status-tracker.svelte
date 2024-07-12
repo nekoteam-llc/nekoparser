@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Toaster, toast } from "svelte-sonner"
+  import { toast } from "svelte-sonner"
   import { onMount } from "svelte"
   import { Link2Off } from "lucide-svelte"
 
@@ -48,5 +48,3 @@
     createSocket()
   })
 </script>
-
-<Toaster />

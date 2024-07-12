@@ -1,28 +1,38 @@
 import asyncio
 import json
-from typing import Optional
+from typing import Optional, Union
 from urllib.parse import urlparse
 
 from fastapi import WebSocket, WebSocketDisconnect
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 
-from packages.database import Product, TheSession, WebsiteSource
+from packages.database import ExcelSource, Product, TheSession, WebsiteSource
 
 
-class Source(BaseModel):
+class WebsiteSourceModel(BaseModel):
     id: str
     url: str
     title: str
     description: str
     icon: str
     state: str
+    type: str
+
+
+class ExcelSourceModel(BaseModel):
+    id: str
+    filename: str
+    minio_uuid: str
+    state: str
+    type: str
 
 
 class SourceManager:
     def __init__(self):
         self._active_connections: list[WebSocket] = []
-        self._sources = []
+        self._web_sources: list[WebsiteSourceModel] = []
+        self._excel_sources: list[ExcelSourceModel] = []
 
         asyncio.create_task(self._ocassional_reloads())
 
@@ -33,11 +43,14 @@ class SourceManager:
         """
 
         with TheSession() as session:
-            sources = (
+            web_sources = (
                 session.query(WebsiteSource).order_by(WebsiteSource.url.desc()).all()
             )
-            self._sources = [
-                Source(
+            excel_sources = (
+                session.query(ExcelSource).order_by(ExcelSource.minio_uuid.desc()).all()
+            )
+            self._web_sources = [
+                WebsiteSourceModel(
                     id=source.id,
                     url=source.url,
                     title=source.name or urlparse(source.url).hostname,
@@ -49,14 +62,38 @@ class SourceManager:
                         source.favicon or "https://cataas.com/cat?width=100&height=100"
                     ),
                     state=source.state.value,
+                    type="web",
                 )
-                for source in sources
+                for source in web_sources
+            ]
+
+            self._excel_sources = [
+                ExcelSourceModel(
+                    id=source.id,
+                    filename=source.filename,
+                    minio_uuid=source.minio_uuid,
+                    state=source.state.value,
+                    type="excel",
+                )
+                for source in excel_sources
             ]
 
         for connection in self._active_connections:
-            await connection.send_text(json.dumps(jsonable_encoder(self._sources)))
+            await connection.send_text(
+                json.dumps(
+                    jsonable_encoder(
+                        {
+                            "web_sources": self._web_sources,
+                            "excel_sources": self._excel_sources,
+                        }
+                    )
+                )
+            )
 
-    def get_source(self, id: str) -> Optional[Source]:
+    def get_source(
+        self,
+        id: str,
+    ) -> Optional[Union[WebsiteSourceModel, ExcelSourceModel]]:
         """
         Get the source by id
 
@@ -64,7 +101,14 @@ class SourceManager:
         :return: The source or None
         """
 
-        return next((source for source in self._sources if source.id == id), None)
+        return next(
+            (
+                source
+                for source in (self._web_sources + self._excel_sources)
+                if source.id == id
+            ),
+            None,
+        )
 
     async def handle_connection(self, connection: WebSocket):
         """
@@ -74,7 +118,7 @@ class SourceManager:
         """
 
         self._active_connections.append(connection)
-        await connection.send_text(json.dumps(jsonable_encoder(self._sources)))
+        await self.reload_sources()
 
         try:
             while True:

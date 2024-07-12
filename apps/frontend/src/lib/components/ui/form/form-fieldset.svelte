@@ -17,6 +17,14 @@
 	export { className as class };
 </script>
 
-<FormPrimitive.Fieldset {form} {name} let:constraints let:errors let:tainted let:value class={cn('space-y-2', className)}>
+<FormPrimitive.Fieldset
+	{form}
+	{name}
+	let:constraints
+	let:errors
+	let:tainted
+	let:value
+	class={cn('space-y-2', className)}
+>
 	<slot {constraints} {errors} {tainted} {value} />
 </FormPrimitive.Fieldset>

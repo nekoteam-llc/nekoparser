@@ -21,7 +21,9 @@ import type {
 	DeleteSourceApiV1SourcesSourceIdDeleteResponse,
 	ReloadSourcesApiV1SourcesReloadPostResponse,
 	ReprocessProductsApiV1SourcesReprocessPostData,
-	ReprocessProductsApiV1SourcesReprocessPostResponse
+	ReprocessProductsApiV1SourcesReprocessPostResponse,
+	UploadExcelFileApiV1SourcesExcelPostData,
+	UploadExcelFileApiV1SourcesExcelPostResponse
 } from './types.gen';
 
 export class ConfigAPI {
@@ -46,7 +48,9 @@ export class ConfigAPI {
 	 * @returns ConfigModel Successful Response
 	 * @throws ApiError
 	 */
-	public static update(data: UpdateConfigApiV1ConfigPutData): CancelablePromise<UpdateConfigApiV1ConfigPutResponse> {
+	public static update(
+		data: UpdateConfigApiV1ConfigPutData
+	): CancelablePromise<UpdateConfigApiV1ConfigPutResponse> {
 		return __request(OpenAPI, {
 			method: 'PUT',
 			url: '/api/v1/config/',
@@ -150,7 +154,9 @@ export class SourcesAPI {
 	 * @returns SourceCreateResponse Successful Response
 	 * @throws ApiError
 	 */
-	public static createSource(data: CreateSourceApiV1SourcesPostData): CancelablePromise<CreateSourceApiV1SourcesPostResponse> {
+	public static createSource(
+		data: CreateSourceApiV1SourcesPostData
+	): CancelablePromise<CreateSourceApiV1SourcesPostResponse> {
 		return __request(OpenAPI, {
 			method: 'POST',
 			url: '/api/v1/sources/',
@@ -168,10 +174,12 @@ export class SourcesAPI {
 	 * Get the source by id
 	 * @param data The data for the request.
 	 * @param data.sourceId
-	 * @returns Source Successful Response
+	 * @returns unknown Successful Response
 	 * @throws ApiError
 	 */
-	public static getSource(data: GetSourceApiV1SourcesSourceIdGetData): CancelablePromise<GetSourceApiV1SourcesSourceIdGetResponse> {
+	public static getSource(
+		data: GetSourceApiV1SourcesSourceIdGetData
+	): CancelablePromise<GetSourceApiV1SourcesSourceIdGetResponse> {
 		return __request(OpenAPI, {
 			method: 'GET',
 			url: '/api/v1/sources/{source_id}',
@@ -192,7 +200,9 @@ export class SourcesAPI {
 	 * @returns MessageResponse Successful Response
 	 * @throws ApiError
 	 */
-	public static deleteSource(data: DeleteSourceApiV1SourcesSourceIdDeleteData): CancelablePromise<DeleteSourceApiV1SourcesSourceIdDeleteResponse> {
+	public static deleteSource(
+		data: DeleteSourceApiV1SourcesSourceIdDeleteData
+	): CancelablePromise<DeleteSourceApiV1SourcesSourceIdDeleteResponse> {
 		return __request(OpenAPI, {
 			method: 'DELETE',
 			url: '/api/v1/sources/{source_id}',
@@ -226,12 +236,36 @@ export class SourcesAPI {
 	 * @returns MessageResponse Successful Response
 	 * @throws ApiError
 	 */
-	public static reprocessProducts(data: ReprocessProductsApiV1SourcesReprocessPostData): CancelablePromise<ReprocessProductsApiV1SourcesReprocessPostResponse> {
+	public static reprocessProducts(
+		data: ReprocessProductsApiV1SourcesReprocessPostData
+	): CancelablePromise<ReprocessProductsApiV1SourcesReprocessPostResponse> {
 		return __request(OpenAPI, {
 			method: 'POST',
 			url: '/api/v1/sources/reprocess',
 			body: data.requestBody,
 			mediaType: 'application/json',
+			errors: {
+				422: 'Validation Error'
+			}
+		});
+	}
+
+	/**
+	 * Upload Excel File
+	 * Upload an Excel file and add it to the database
+	 * @param data The data for the request.
+	 * @param data.formData
+	 * @returns SourceCreateResponse Successful Response
+	 * @throws ApiError
+	 */
+	public static uploadExcelFile(
+		data: UploadExcelFileApiV1SourcesExcelPostData
+	): CancelablePromise<UploadExcelFileApiV1SourcesExcelPostResponse> {
+		return __request(OpenAPI, {
+			method: 'POST',
+			url: '/api/v1/sources/excel',
+			formData: data.formData,
+			mediaType: 'multipart/form-data',
 			errors: {
 				422: 'Validation Error'
 			}

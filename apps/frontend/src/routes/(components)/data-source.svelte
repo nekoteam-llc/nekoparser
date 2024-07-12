@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { TriangleAlert } from "lucide-svelte"
+  import { Table2, TriangleAlert } from "lucide-svelte"
   import { Badge } from "$lib/components/ui/badge"
   import { Progress } from "$lib/components/ui/progress"
   import * as Card from "$lib/components/ui/card"
@@ -7,10 +7,10 @@
   import { Separator } from "$lib/components/ui/separator"
 
   export let id: string
-  export let icon: string
   export let title: string
-  export let description: string
   export let state: string
+  export let icon: string | null = null
+  export let description: string | null = null
 
   function statusToProgress(status: string) {
     const consequtiveStatuses = [
@@ -30,37 +30,58 @@
     }
     return 0
   }
+
+  const actionRequired = state === "xpaths_pending" || state === "data_pending_approval"
 </script>
 
-<a href="/sources/{id}">
-  <Card.Root class="flex flex-col space-y-4 shadow-sm shadow-transparent transition-shadow hover:shadow-purple-950">
-    <Card.Header>
+<a href="/sources/{id}" class="mb-4 mr-4 block break-inside-avoid">
+  <Card.Root
+    class="{description === null
+      ? "h-[117px]"
+      : "h-[250px]"} flex flex-col justify-between space-y-4 border-opacity-50 shadow-sm shadow-transparent transition-all ease-in-out hover:-translate-y-1 hover:shadow-purple-950 {actionRequired
+      ? "!shadow-orange-900"
+      : ""}"
+  >
+    <Card.Header class="pb-0">
       <div class="flex items-center space-x-2">
-        <Avatar.Root class="h-6 w-6">
-          <Avatar.Image src={icon} alt={title} />
-          <Avatar.Fallback>{title.substring(0, 2).toUpperCase()}</Avatar.Fallback>
-        </Avatar.Root>
+        {#if icon}
+          <Avatar.Root class="h-6 w-6">
+            <Avatar.Image src={icon} alt={title} />
+            <Avatar.Fallback>{title.substring(0, 2).toUpperCase()}</Avatar.Fallback>
+          </Avatar.Root>
+        {:else}
+          <Table2 class="h-6 w-6" />
+        {/if}
         <Card.Title>
           <h3 class="text-lg font-semibold">{title}</h3>
         </Card.Title>
       </div>
-      <p class="text-muted-foreground">
-        {description.substring(0, 100)}{description.length > 100 ? "..." : ""}
-      </p>
+      {#if description}
+        <p class="h-16 w-full overflow-hidden text-ellipsis text-sm text-muted-foreground">
+          {description}
+        </p>
+      {/if}
     </Card.Header>
-    <Card.Content class="flex items-center space-x-2 {state === "xpaths_pending" || state === "data_pending_approval" ? "pb-0" : ""}">
-      <Badge variant={state === "unavailable" ? "destructive" : "default"} class={state === "finished" ? "bg-emerald-700 text-white" : ""}>
+    <Card.Content class="flex items-center space-x-2 {actionRequired ? "pb-0" : ""}">
+      <Badge
+        variant={state === "unavailable" ? "destructive" : "default"}
+        class={state === "finished"
+          ? "bg-emerald-700 hover:bg-emerald-700/90 text-white"
+          : actionRequired
+          ? "bg-orange-600 hover:bg-orange-600/90 text-white"
+          : ""}
+      >
         {state.replaceAll("_", "\xA0")}
       </Badge>
       <Progress value={statusToProgress(state)} />
     </Card.Content>
-    {#if state === "xpaths_pending" || state === "data_pending_approval"}
+    {#if actionRequired}
       <Card.Footer>
         <div class="w-full">
           <Separator />
           <div class="mt-4 flex items-center">
-            <TriangleAlert class="mr-1 h-5 text-yellow-500" />
-            <p class="text-yellow-500">User action is required. Open the source</p>
+            <TriangleAlert class="mr-1 h-5 text-orange-400" />
+            <p class="text-base text-orange-400">User action is required. Open the source</p>
           </div>
         </div>
       </Card.Footer>

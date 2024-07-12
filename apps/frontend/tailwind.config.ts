@@ -14,6 +14,12 @@ const config: Config = {
       },
     },
     extend: {
+      backgroundImage: {
+        shine: "linear-gradient(110deg, #09090b 8%, #0f0f0f 18%, #09090b 33%)",
+      },
+      backgroundSize: {
+        200: "200%",
+      },
       colors: {
         border: "hsl(var(--border) / <alpha-value>)",
         input: "hsl(var(--input) / <alpha-value>)",
@@ -62,6 +68,16 @@ const config: Config = {
         102: "1.02",
         103: "1.03",
         104: "1.04",
+      },
+      animation: {
+        shine: "shine 1s infinite linear",
+      },
+      keyframes: {
+        shine: {
+          "100%": {
+            backgroundPosition: "-200% 0",
+          },
+        },
       },
     },
   },

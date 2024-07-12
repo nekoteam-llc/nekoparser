@@ -1,15 +1,24 @@
+from typing import Union
 from urllib.parse import urlparse
 
-from fastapi import APIRouter, HTTPException, WebSocket
+from fastapi import APIRouter, File, HTTPException, UploadFile, WebSocket
 from pydantic import BaseModel
 
-from packages.database import Product, TheSession, WebsiteSource
+from packages.database import (
+    ExcelSource,
+    ExcelSourceState,
+    Product,
+    TheSession,
+    WebsiteSource,
+)
+from packages.filestorage import filestorage
+from transformations.excel.connector import schedule_excel_processing
 from transformations.websites.connector import (
     schedule_initial_processing,
     schedule_reprocessing,
 )
 
-from .source_manager import Source, source_manager
+from .source_manager import ExcelSourceModel, WebsiteSourceModel, source_manager
 
 router = APIRouter(
     prefix="/api/v1/sources",
@@ -18,7 +27,7 @@ router = APIRouter(
 
 
 class SourcesResponse(BaseModel):
-    sources: list[Source]
+    sources: list[WebsiteSourceModel]
 
 
 class SourceCreateResponse(BaseModel):
@@ -44,7 +53,7 @@ async def get_sources() -> SourcesResponse:
 
         return SourcesResponse(
             sources=[
-                Source(
+                WebsiteSourceModel(
                     id=source.id,
                     url=source.url,
                     title=source.name or urlparse(source.url).hostname,
@@ -56,6 +65,7 @@ async def get_sources() -> SourcesResponse:
                         source.favicon or "https://cataas.com/cat?width=100&height=100"
                     ),
                     state=source.state.value,
+                    type="web",
                 )
                 for source in sources
             ]
@@ -79,7 +89,7 @@ async def create_source(url: str) -> SourceCreateResponse:
 
 
 @router.get("/{source_id}")
-async def get_source(source_id: str) -> Source:
+async def get_source(source_id: str) -> Union[WebsiteSourceModel, ExcelSourceModel]:
     """
     Get the source by id
     """
@@ -100,7 +110,14 @@ async def delete_source(source_id: str) -> MessageResponse:
         raise HTTPException(status_code=404, detail="Source not found")
 
     with TheSession() as session:
-        session.query(WebsiteSource).filter(WebsiteSource.id == source_id).delete()
+        if session.query(WebsiteSource).filter(WebsiteSource.id == source_id).first():
+            session.query(WebsiteSource).filter(WebsiteSource.id == source_id).delete()
+        elif session.query(ExcelSource).filter(ExcelSource.id == source_id).first():
+            session.query(ExcelSource).filter(ExcelSource.id == source_id).delete()
+            filestorage.delete(source_id)
+        else:
+            raise HTTPException(status_code=404, detail="Source not found")
+
         session.commit()
         await source_manager.reload_sources()
 
@@ -150,3 +167,26 @@ async def websocket_endpoint(websocket: WebSocket):
 async def websocket_data_endpoint(websocket: WebSocket, source_id: str):
     await websocket.accept()
     await source_manager.handle_data_connection(source_id, websocket)
+
+
+@router.post("/excel")
+async def upload_excel_file(file: UploadFile = File(...)) -> SourceCreateResponse:
+    """
+    Upload an Excel file and add it to the database
+    """
+
+    file_bytes = await file.read()
+    minio_uuid = filestorage.upload(file_bytes)
+
+    with TheSession() as session:
+        excel_source = ExcelSource(
+            minio_uuid=minio_uuid,
+            filename=file.filename,
+            state=ExcelSourceState.CREATED,
+        )
+        session.add(excel_source)
+        session.commit()
+        await source_manager.reload_sources()
+        await schedule_excel_processing(excel_source.id)
+
+    return SourceCreateResponse(id=excel_source.id)

@@ -43,6 +43,7 @@ aiohttp = "^3.9.5"
 deep-translator = "^1.11.4"
 lxml = "^5.2.2"
 fake-useragent = "^1.5.1"
+minio = "^7.2.7"
 
 [tool.poetry.group.dev.dependencies]
 pyright = "1.1.371"

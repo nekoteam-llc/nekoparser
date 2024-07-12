@@ -1,18 +1,16 @@
-# MegaParser
+<img src="https://github.com/user-attachments/assets/fcd863c9-ee42-441e-836a-5ab709ccef52" width="200">
 
-## Description
-Extensible parser for HTML pages, XLSX tables, PDF documents. Extracts data in the format known to [Satu.kz](https://satu.kz) and optionally uploads it to the website.
+> Extensible parser for HTML pages, XLSX tables, PDF documents. Extracts data in the format known to [Satu.kz](https://satu.kz) and optionally uploads it to the website.
 
-![изображение](https://github.com/nekoteam-llc/nekoparser/assets/157527321/75a827ea-23ba-4ff5-8204-fd4ad2b80055)
-![изображение](https://github.com/nekoteam-llc/nekoparser/assets/157527321/6e1dbed4-59f9-4b20-ac0c-9a3d5191e8b2)
+![chrome_pmYVmkxU9p](https://github.com/user-attachments/assets/62980288-6e9a-4292-8053-a37cb6d84c81)
+![chrome_vzb1r5Qi1o](https://github.com/user-attachments/assets/01c9c55c-0bae-4dc1-88f7-cbd7ff2661e3)
+![chrome_PuR9TZehuY](https://github.com/user-attachments/assets/808a98e3-8dba-4b43-9830-7316ba9dbd86)
 
 ## How to use
-1. Install [chrome plugin](https://github.com/nekoteam-llc/nekoparser/tree/master/chrome-plugin)
-2. log onto https://nekoparser.dan.tatar/
-3. Add source
-4. Select prompted elements
-5. Wait for parsing
-6. Download data in CSV/JSON format
+1. Install the [chrome plugin](https://github.com/nekoteam-llc/nekoparser/tree/master/chrome-plugin)
+2. Log in to https://nekoparser.dan.tatar using CloudFlare Acccess
+3. Add the source
+4. Follow the instructions of the extension
 
 ## Deployment
 1. Install docker and `compose` plugin

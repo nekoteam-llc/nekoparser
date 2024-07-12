@@ -12,6 +12,10 @@
 	export { className as class };
 </script>
 
-<svelte:element this={tag} class={cn('font-semibold leading-none tracking-tight', className)} {...$$restProps}>
+<svelte:element
+	this={tag}
+	class={cn('font-semibold leading-none tracking-tight', className)}
+	{...$$restProps}
+>
 	<slot />
 </svelte:element>

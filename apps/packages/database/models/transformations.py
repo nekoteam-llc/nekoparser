@@ -7,7 +7,14 @@ from sqlalchemy.orm import mapped_column
 
 from ..database import Base
 
-__all__ = ["WebsiteSource", "FileSource", "FileType", "Product"]
+__all__ = [
+    "WebsiteSource",
+    "ExcelSource",
+    "Product",
+    "ExcelSourceState",
+    "WebsiteSourceState",
+    "Config",
+]
 
 
 class WebsiteSourceState(enum.Enum):
@@ -34,6 +41,30 @@ class WebsiteSourceState(enum.Enum):
     DATA_COLLECTING = "data_collecting"
 
     # The data is awaiting approval
+    DATA_PENDING_APPROVAL = "data_pending_approval"
+
+    # The data has been approved
+    FINISHED = "finished"
+
+    # Exporting to Satu.kz
+    EXPORTING = "exporting"
+
+    # Export complete
+    EXPORTED = "exported"
+
+
+class ExcelSourceState(enum.Enum):
+    """
+    Represents the state of the Excel source
+    """
+
+    # The file has just been added to the database
+    CREATED = "created"
+
+    # The file is being processed
+    PROCESSING = "processing"
+
+    # The file has been processed
     DATA_PENDING_APPROVAL = "data_pending_approval"
 
     # The data has been approved
@@ -84,22 +115,12 @@ class WebsiteSource(Base):
     )
 
 
-class FileType(enum.Enum):
+class ExcelSource(Base):
     """
-    Represents the type of the file
-    """
-
-    CSV = "csv"
-    XLSX = "xlsx"
-    PDF = "pdf"
-
-
-class FileSource(Base):
-    """
-    Represents a data scraping source in the form of the file
+    Represents a data scraping source in the form of the .xlsx file
     """
 
-    __tablename__ = "file_source"
+    __tablename__ = "xlsx_source"
 
     id = mapped_column(
         UUID(as_uuid=False),
@@ -107,18 +128,28 @@ class FileSource(Base):
         default=lambda: str(uuid.uuid4()),
         nullable=False,
     )
+    filename = mapped_column(
+        Text,
+        nullable=False,
+        comment="The name of the file",
+    )
     minio_uuid = mapped_column(
         UUID(as_uuid=False),
         comment="The UUID of the file in the MinIO storage",
     )
-    file_type = mapped_column(Enum(FileType), nullable=False)
-    file_metadata = mapped_column(
+    column_mapping = mapped_column(
         JSONB,
-        comment="The metadata of the file used to transform the data",
+        comment="The mapping between the file columns and the Satu fields",
     )
     last_processed = mapped_column(
         DateTime,
         comment="The last time the file was processed",
+    )
+    state = mapped_column(
+        Enum(ExcelSourceState),
+        nullable=False,
+        default=ExcelSourceState.CREATED,
+        comment="The FSM state of the Excel source",
     )
 
 

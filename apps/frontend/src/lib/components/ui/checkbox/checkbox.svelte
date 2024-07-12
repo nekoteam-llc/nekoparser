@@ -21,7 +21,11 @@
 	on:click
 	{...$$restProps}
 >
-	<CheckboxPrimitive.Indicator class={cn('flex h-4 w-4 items-center justify-center text-current')} let:isChecked let:isIndeterminate>
+	<CheckboxPrimitive.Indicator
+		class={cn('flex h-4 w-4 items-center justify-center text-current')}
+		let:isChecked
+		let:isIndeterminate
+	>
 		{#if isIndeterminate}
 			<Minus class="h-3.5 w-3.5" />
 		{:else}

@@ -106,11 +106,11 @@
     let isHotKey = keysToCheck.includes(eventKey)
     if (
       eventKey.length === 1
-        // eslint-disable-next-line regexp/no-obscure-range
-        && /[а-яА-Я]/.test(eventKey)
-        && layout[eventKey] !== undefined
-        && !isHotKey
-        && keysToCheck.includes(layout[eventKey])
+      // eslint-disable-next-line regexp/no-obscure-range
+      && /[а-яА-Я]/.test(eventKey)
+      && layout[eventKey] !== undefined
+      && !isHotKey
+      && keysToCheck.includes(layout[eventKey])
     ) {
       isHotKey = true
     }
