@@ -61,6 +61,12 @@ class ExcelSourceState(enum.Enum):
     # The file has just been added to the database
     CREATED = "created"
 
+    # Extracting SKUs from the file
+    EXTRACTING_SKUS = "extracting_skus"
+
+    # The SKUs have been extracted
+    SKUS_EXTRACTED = "skus_extracted"
+
     # The file is being processed
     PROCESSING = "processing"
 
@@ -133,14 +139,6 @@ class ExcelSource(Base):
         nullable=False,
         comment="The name of the file",
     )
-    minio_uuid = mapped_column(
-        UUID(as_uuid=False),
-        comment="The UUID of the file in the MinIO storage",
-    )
-    column_mapping = mapped_column(
-        JSONB,
-        comment="The mapping between the file columns and the Satu fields",
-    )
     last_processed = mapped_column(
         DateTime,
         comment="The last time the file was processed",
@@ -150,6 +148,16 @@ class ExcelSource(Base):
         nullable=False,
         default=ExcelSourceState.CREATED,
         comment="The FSM state of the Excel source",
+    )
+    url = mapped_column(
+        Text,
+        nullable=False,
+        comment="The URL of the file",
+    )
+    url_expires = mapped_column(
+        DateTime,
+        nullable=False,
+        comment="The time when the URL expires",
     )
 
 
@@ -255,4 +263,9 @@ class Config(Base):
         Text,
         nullable=False,
         comment="The prompt for the properties",
+    )
+    columns_prompt = mapped_column(
+        Text,
+        nullable=False,
+        comment="The prompt used to match columns between Excel and Satu",
     )

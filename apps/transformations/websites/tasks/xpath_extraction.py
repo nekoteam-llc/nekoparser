@@ -10,12 +10,7 @@ from lxml import etree
 from prefect import flow, task
 from sqlalchemy.dialects.postgresql import insert
 
-from packages.chatgpt import (
-    ExtractKeywords,
-    ExtractProperties,
-    NormalizeDescription,
-    chatgpt,
-)
+from packages.chatgpt import ExtractProperties, chatgpt
 from packages.database import (
     Config,
     Product,
@@ -25,7 +20,12 @@ from packages.database import (
 )
 from packages.log import get_logger
 from packages.schemas.satu import UserFilledData
-from transformations.utils import reload_sources
+from transformations.utils import (
+    arbitrary_cleanup,
+    process_description,
+    process_keywords,
+    reload_sources,
+)
 
 from .scrape_website import scrape_website
 
@@ -69,45 +69,6 @@ def process_price(price: str) -> float:
 
 def process_arbitrary_string(currency: str) -> str:
     return re.sub(r"[^A-Za-zА-Яа-яЁёÀ-ÿ.]", "", currency)
-
-
-def arbitrary_cleanup(text: str) -> str:
-    return (
-        re.sub(
-            r"\n{2,}",
-            "\n",
-            text.replace("\t", "").replace("\r", "").strip(),
-        )
-        .removeprefix("Описание")
-        .strip()
-    )
-
-
-async def process_description(description: str) -> str:
-    description = arbitrary_cleanup(description)
-    if not description:
-        return "N/A"
-
-    try:
-        return await chatgpt(NormalizeDescription(description))
-    except Exception as e:
-        get_logger().exception(
-            "Failed to normalize description",
-            extra={"error": str(e)},
-        )
-        return "N/A"
-
-
-async def process_keywords(text: str) -> str:
-    text = arbitrary_cleanup(text)
-    if not text:
-        return ""
-
-    try:
-        return ", ".join(await chatgpt(ExtractKeywords(text)))
-    except Exception as e:
-        get_logger().exception("Failed to extract keywords", extra={"error": str(e)})
-        return ""
 
 
 async def process_properties(properties: str) -> dict[str, Any]:

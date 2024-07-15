@@ -19,6 +19,8 @@ import type {
 	GetSourceApiV1SourcesSourceIdGetResponse,
 	DeleteSourceApiV1SourcesSourceIdDeleteData,
 	DeleteSourceApiV1SourcesSourceIdDeleteResponse,
+	UpdateSourceApiV1SourcesSourceIdPutData,
+	UpdateSourceApiV1SourcesSourceIdPutResponse,
 	ReloadSourcesApiV1SourcesReloadPostResponse,
 	ReprocessProductsApiV1SourcesReprocessPostData,
 	ReprocessProductsApiV1SourcesReprocessPostResponse,
@@ -209,6 +211,32 @@ export class SourcesAPI {
 			path: {
 				source_id: data.sourceId
 			},
+			errors: {
+				422: 'Validation Error'
+			}
+		});
+	}
+
+	/**
+	 * Update Source
+	 * Update the source by id
+	 * @param data The data for the request.
+	 * @param data.sourceId
+	 * @param data.requestBody
+	 * @returns MessageResponse Successful Response
+	 * @throws ApiError
+	 */
+	public static updateSource(
+		data: UpdateSourceApiV1SourcesSourceIdPutData
+	): CancelablePromise<UpdateSourceApiV1SourcesSourceIdPutResponse> {
+		return __request(OpenAPI, {
+			method: 'PUT',
+			url: '/api/v1/sources/{source_id}',
+			path: {
+				source_id: data.sourceId
+			},
+			body: data.requestBody,
+			mediaType: 'application/json',
 			errors: {
 				422: 'Validation Error'
 			}

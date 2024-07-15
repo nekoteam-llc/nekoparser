@@ -1,5 +1,11 @@
 from .base import chatgpt
-from .prompt import ExtractKeywords, ExtractProperties, NormalizeDescription, Prompt
+from .prompt import (
+    ExtractKeywords,
+    ExtractProperties,
+    FindSKU,
+    NormalizeDescription,
+    Prompt,
+)
 
 __all__ = [
     "chatgpt",
@@ -7,4 +13,5 @@ __all__ = [
     "ExtractProperties",
     "NormalizeDescription",
     "ExtractKeywords",
+    "FindSKU",
 ]

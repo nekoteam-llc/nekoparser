@@ -3,6 +3,7 @@
 
 from prefect import serve
 
+from .excel.pipeline import excel_processing
 from .websites.pipeline import extract_products, initial_processing, reprocess_products
 
 
@@ -23,5 +24,9 @@ def serve_all():
         reprocess_products.to_deployment(
             name=reprocess_products.name,
             tags=["websites"],
+        ),
+        excel_processing.to_deployment(
+            name=excel_processing.name,
+            tags=["excel"],
         ),
     )

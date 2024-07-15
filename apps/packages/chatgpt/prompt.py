@@ -1,3 +1,4 @@
+import json
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -72,3 +73,20 @@ class ExtractKeywords(Prompt):
             raise ChatGPTException("Invalid response from ChatGPT.")
 
         return response["keywords"]
+
+
+class FindSKU(Prompt):
+    def __init__(self, columns: dict[str, str]):
+        self._columns = columns
+
+    async def generate(self) -> ChatGPTQuery:
+        return ChatGPTQuery(
+            system_message=get_config().columns_prompt,
+            user_message=json.dumps(self._columns, ensure_ascii=False),
+        )
+
+    async def parse_response(self, response: dict) -> str:
+        if "column" not in response:
+            raise ChatGPTException("Invalid response from ChatGPT.")
+
+        return response["column"]

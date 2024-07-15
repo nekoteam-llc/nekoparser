@@ -5,7 +5,9 @@
   import { Toaster, toast } from "svelte-sonner"
   import { formSchema } from "./new-source-schema"
   import {
+    ConnectorAPI,
     type CreateSourceApiV1SourcesPostResponse,
+    type Property,
     SourcesAPI,
     type UploadExcelFileApiV1SourcesExcelPostResponse,
   } from "$client/index"
@@ -14,6 +16,16 @@
   import HotKeys from "$lib/custom/hotkeys.svelte"
   import { Input } from "$lib/components/ui/input"
   import * as Form from "$lib/components/ui/form"
+  import { browser } from "$app/environment"
+
+  let properties: string[] = []
+
+  if (browser) {
+    ConnectorAPI.getProperties().then((response) => {
+      properties = response.properties.map((property: Property) => property.name)
+      properties = properties.filter(property => property !== "properties")
+    })
+  }
 
   const form = superForm(defaults(zod(formSchema)), {
     SPA: true,
@@ -167,6 +179,11 @@
           />
         </Form.Control>
         <Form.FieldErrors />
+        <p class="text-center text-sm text-gray-400">
+          First row entries must be named according to the naming convention: <span
+            class="text-gray-300">{properties.join(", ")}</span
+          >
+        </p>
       </Form.Field>
     </form>
   </AlertDialog.Content>

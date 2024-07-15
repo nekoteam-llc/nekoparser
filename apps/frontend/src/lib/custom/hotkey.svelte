@@ -134,7 +134,6 @@
     const isKeyDown = event.type === "keydown"
     const isKeyPressed = isEventKeyHotKey(event)
     if (isKeyPressed) {
-      event.preventDefault()
       if (isKeyDown) {
         dispatch("hot", { key })
         value = true

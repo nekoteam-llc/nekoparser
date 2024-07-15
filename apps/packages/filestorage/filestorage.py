@@ -54,3 +54,17 @@ def delete(minio_uuid: str, bucket_name: str = "excel"):
     """
 
     client.remove_object(bucket_name, minio_uuid)
+
+
+def get_url(minio_uuid: str, bucket_name: str = "excel") -> str:
+    """
+    Gets the URL of the file
+
+    :param minio_uuid: The UUID of the file
+    :return: The URL
+    """
+
+    return (
+        "https://nekoparser-s3.dan.tatar/"
+        + client.presigned_get_object(bucket_name, minio_uuid).split("/", maxsplit=3)[-1]
+    )

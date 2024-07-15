@@ -114,10 +114,6 @@ export const $ExcelSourceModel = {
 			type: 'string',
 			title: 'Filename'
 		},
-		minio_uuid: {
-			type: 'string',
-			title: 'Minio Uuid'
-		},
 		state: {
 			type: 'string',
 			title: 'State'
@@ -125,10 +121,14 @@ export const $ExcelSourceModel = {
 		type: {
 			type: 'string',
 			title: 'Type'
+		},
+		url: {
+			type: 'string',
+			title: 'Url'
 		}
 	},
 	type: 'object',
-	required: ['id', 'filename', 'minio_uuid', 'state', 'type'],
+	required: ['id', 'filename', 'state', 'type', 'url'],
 	title: 'ExcelSourceModel'
 } as const;
 
@@ -303,6 +303,36 @@ export const $SourcesResponse = {
 	type: 'object',
 	required: ['sources'],
 	title: 'SourcesResponse'
+} as const;
+
+export const $UpdateSourceRequest = {
+	properties: {
+		name: {
+			anyOf: [
+				{
+					type: 'string'
+				},
+				{
+					type: 'null'
+				}
+			],
+			title: 'Name'
+		},
+		description: {
+			anyOf: [
+				{
+					type: 'string'
+				},
+				{
+					type: 'null'
+				}
+			],
+			title: 'Description'
+		}
+	},
+	type: 'object',
+	required: ['name', 'description'],
+	title: 'UpdateSourceRequest'
 } as const;
 
 export const $ValidationError = {

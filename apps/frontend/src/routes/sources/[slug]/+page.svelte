@@ -300,6 +300,43 @@
         toast.error("Failed to start reprocessing.")
       })
   }
+
+  function handleTitleChange(event: Event) {
+    const target = event.target as HTMLElement
+    if (
+      source
+      && ("icon" in source
+        ? source.title !== target.textContent
+        : source.filename !== target.textContent)
+    ) {
+      SourcesAPI.updateSource({
+        sourceId: source.id,
+        requestBody: { name: target.textContent, description: null },
+      })
+        .then(() => {
+          toast.success("Updated source title!")
+        })
+        .catch(() => {
+          toast.error("Failed to update source title.")
+        })
+    }
+  }
+
+  function handleDescriptionChange(event: Event) {
+    const target = event.target as HTMLElement
+    if (source) {
+      SourcesAPI.updateSource({
+        sourceId: source.id,
+        requestBody: { name: null, description: target.textContent },
+      })
+        .then(() => {
+          toast.success("Updated source description!")
+        })
+        .catch(() => {
+          toast.error("Failed to update source description.")
+        })
+    }
+  }
 </script>
 
 <div class="p-8">
@@ -321,17 +358,26 @@
           <Avatar.Image src={source.icon} alt={source.title} />
           <Avatar.Fallback>{source.title.substring(0, 2).toUpperCase()}</Avatar.Fallback>
         </Avatar.Root>
-        <h2 class="ml-2 text-2xl font-semibold tracking-tight">{source.title}</h2>
       {:else}
         <Table2 class="h-8 w-8" />
-        <h2 class="ml-2 text-2xl font-semibold tracking-tight">{source.filename}</h2>
       {/if}
-      <Badge class="ml-4">
+      <h2
+        class="ml-1 rounded-md border border-transparent p-1 text-2xl font-semibold tracking-tight outline-none transition-all ease-in-out focus:border-border"
+        contenteditable
+        on:blur={handleTitleChange}
+      >
+        {"title" in source ? source.title : source.filename}
+      </h2>
+      <Badge class="ml-3">
         {source.state.replaceAll("_", "\xA0")}
       </Badge>
     </div>
     {#if "description" in source}
-      <p class="ml-10 mt-2 w-1/3 text-muted-foreground">
+      <p
+        class="ml-10 mt-2 w-1/3 rounded-md border border-transparent p-1 text-muted-foreground outline-none transition-all ease-in-out focus:border-border"
+        contenteditable
+        on:blur={handleDescriptionChange}
+      >
         {source.description}
       </p>
     {/if}
@@ -424,7 +470,7 @@
     </AlertDialog.Root>
   </div>
   <div class="mt-8">
-    {#if !source || ["data_collecting", "data_pending_approval", "finished"].find(state => state === source?.state) !== undefined}
+    {#if !source || ["processing", "data_collecting", "data_pending_approval", "finished"].find(state => state === source?.state) !== undefined}
       {#if products.length > 0}
         <Table.Root>
           <Table.Header>
@@ -432,74 +478,95 @@
               <Table.Head></Table.Head>
               <Table.Head>#</Table.Head>
               {#each keys as key}
-                <Table.Head>{key_translation[key]}</Table.Head>
+                <Table.Head>{key_translation[key].replace(" ", "\xA0")}</Table.Head>
               {/each}
             </Table.Row>
           </Table.Header>
           <Table.Body>
             {#each products as product, i}
-              <Table.Row class={product.reprocessing ? "opacity-65 hover:!bg-transparent" : ""}>
-                <Table.Cell>
-                  {#if product.reprocessing}
-                    <LoaderCircle class="h-4 w-4 animate-spin" />
-                  {:else}
-                    <Checkbox bind:checked={checked[product.id]} />
-                  {/if}
-                </Table.Cell>
-                <Table.Cell>{i + 1}</Table.Cell>
-                {#each keys as key}
-                  {#if key === "description" || key === "keywords" || key === "properties"}
-                    <Table.Cell>
-                      {#if product.data[key] !== "N/A"}
-                        <Popover.Root>
-                          <Popover.Trigger>
-                            <Button class="h-auto w-full p-1 px-2 text-xs" variant="secondary"
-                            >Open</Button
-                            >
-                          </Popover.Trigger>
-                          <Popover.Content class="max-w-1/2">
-                            {#if key === "properties"}
-                              {#if Object.keys(product.data[key]).length > 0}
-                                <Table.Root class="w-fit">
-                                  <Table.Body>
-                                    {#each Object.keys(product.data[key]) as property}
-                                      <Table.Row>
-                                        <Table.Cell>{property}</Table.Cell>
-                                        <Table.Cell>{product.data[key][property]}</Table.Cell>
-                                      </Table.Row>
-                                    {/each}
-                                  </Table.Body>
-                                </Table.Root>
+              {#if product.data.name}
+                <Table.Row class={product.reprocessing ? "opacity-65 hover:!bg-transparent" : ""}>
+                  <Table.Cell>
+                    {#if product.reprocessing}
+                      <LoaderCircle class="h-4 w-4 animate-spin" />
+                    {:else}
+                      <Checkbox bind:checked={checked[product.id]} />
+                    {/if}
+                  </Table.Cell>
+                  <Table.Cell>{i + 1}</Table.Cell>
+                  {#each keys as key}
+                    {#if key === "url" && source?.type === "excel"}
+                      <Table.Cell>
+                        <a href={source?.url} target="_blank" rel="noopener noreferrer">
+                          <Button
+                            class="flex h-auto items-center justify-center p-1 px-2 text-xs"
+                            variant="secondary"
+                          >
+                            Download <ExternalLink class="ml-1 h-3 w-3" />
+                          </Button>
+                        </a>
+                      </Table.Cell>
+                    {:else if product.data[key] === undefined}
+                      <Table.Cell>
+                        {#if product.reprocessing}
+                          <LoaderCircle class="h-4 w-4 animate-spin" />
+                        {:else}
+                          N/A
+                        {/if}
+                      </Table.Cell>
+                    {:else if key === "description" || key === "keywords" || key === "properties"}
+                      <Table.Cell>
+                        {#if product.data[key] !== "N/A"}
+                          <Popover.Root>
+                            <Popover.Trigger>
+                              <Button class="h-auto w-full p-1 px-2 text-xs" variant="secondary"
+                              >Open</Button
+                              >
+                            </Popover.Trigger>
+                            <Popover.Content class="max-w-1/2">
+                              {#if key === "properties"}
+                                {#if Object.keys(product.data[key]).length > 0}
+                                  <Table.Root class="w-fit">
+                                    <Table.Body>
+                                      {#each Object.keys(product.data[key]) as property}
+                                        <Table.Row>
+                                          <Table.Cell>{property}</Table.Cell>
+                                          <Table.Cell>{product.data[key][property]}</Table.Cell>
+                                        </Table.Row>
+                                      {/each}
+                                    </Table.Body>
+                                  </Table.Root>
+                                {:else}
+                                  <p class="text-center">No properties found</p>
+                                {/if}
                               {:else}
-                                <p class="text-center">No properties found</p>
+                                {#each product.data[key].split("\n") as line}
+                                  <p class="mt-2">{line}</p>
+                                {/each}
                               {/if}
-                            {:else}
-                              {#each product.data[key].split("\n") as line}
-                                <p class="mt-2">{line}</p>
-                              {/each}
-                            {/if}
-                          </Popover.Content>
-                        </Popover.Root>
-                      {:else}
-                        <p class="mt-2">N/A</p>
-                      {/if}
-                    </Table.Cell>
-                  {:else if typeof product.data[key] === "string" && (product.data[key].startsWith("http://") || product.data[key].startsWith("https://"))}
-                    <Table.Cell>
-                      <a href={product.data[key]} target="_blank" rel="noopener noreferrer">
-                        <Button
-                          class="flex h-auto items-center justify-center p-1 px-2 text-xs"
-                          variant="secondary"
-                        >
-                          Open <ExternalLink class="ml-1 h-3 w-3" />
-                        </Button>
-                      </a>
-                    </Table.Cell>
-                  {:else}
-                    <Table.Cell>{product.data[key]}</Table.Cell>
-                  {/if}
-                {/each}
-              </Table.Row>
+                            </Popover.Content>
+                          </Popover.Root>
+                        {:else}
+                          <p class="mt-2">N/A</p>
+                        {/if}
+                      </Table.Cell>
+                    {:else if typeof product.data[key] === "string" && (product.data[key].startsWith("http://") || product.data[key].startsWith("https://"))}
+                      <Table.Cell>
+                        <a href={product.data[key]} target="_blank" rel="noopener noreferrer">
+                          <Button
+                            class="flex h-auto items-center justify-center p-1 px-2 text-xs"
+                            variant="secondary"
+                          >
+                            Open <ExternalLink class="ml-1 h-3 w-3" />
+                          </Button>
+                        </a>
+                      </Table.Cell>
+                    {:else}
+                      <Table.Cell>{product.data[key]}</Table.Cell>
+                    {/if}
+                  {/each}
+                </Table.Row>
+              {/if}
             {/each}
           </Table.Body>
         </Table.Root>

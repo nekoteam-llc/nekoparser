@@ -4,24 +4,21 @@ from typing import Any
 import aiohttp
 
 from packages.database import Config, TheSession
+from packages.log import get_logger
 
-from .config import config
 from .exceptions import ChatGPTException
 from .models import ChatGPTQuery
 from .prompt import Prompt
 
 
 class ChatGPTClient:
-    def __init__(self):
-        self.api_url = config.chatgpt_api_url
-
     async def _request(self, query: ChatGPTQuery) -> dict:
         with TheSession() as session:
             global_config = session.query(Config).one()
 
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                self.api_url,
+                "https://api.openai.com/v1/chat/completions",
                 json={
                     "model": global_config.model,
                     "response_format": {"type": "json_object"},
@@ -39,11 +36,13 @@ class ChatGPTClient:
                 return await response.json()
 
     async def __call__(self, prompt: Prompt) -> Any:
+        logger = get_logger()
         query = await prompt.generate()
         response = await self._request(query)
         try:
             result = json.loads(response["choices"][0]["message"]["content"])
         except (KeyError, IndexError):
+            logger.error(json.dumps(response, indent=2))
             raise ChatGPTException("Invalid response from ChatGPT.")
 
         return await prompt.parse_response(result)

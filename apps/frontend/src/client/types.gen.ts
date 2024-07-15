@@ -28,9 +28,9 @@ export type ConnectorSourcesResponse = {
 export type ExcelSourceModel = {
 	id: string;
 	filename: string;
-	minio_uuid: string;
 	state: string;
 	type: string;
+	url: string;
 };
 
 export type HTTPValidationError = {
@@ -83,6 +83,11 @@ export type SourceUpdateResponse = {
 
 export type SourcesResponse = {
 	sources: Array<WebsiteSourceModel>;
+};
+
+export type UpdateSourceRequest = {
+	name: string | null;
+	description: string | null;
 };
 
 export type ValidationError = {
@@ -141,6 +146,13 @@ export type DeleteSourceApiV1SourcesSourceIdDeleteData = {
 };
 
 export type DeleteSourceApiV1SourcesSourceIdDeleteResponse = MessageResponse;
+
+export type UpdateSourceApiV1SourcesSourceIdPutData = {
+	requestBody: UpdateSourceRequest;
+	sourceId: string;
+};
+
+export type UpdateSourceApiV1SourcesSourceIdPutResponse = MessageResponse;
 
 export type ReloadSourcesApiV1SourcesReloadPostResponse = MessageResponse;
 
@@ -264,6 +276,19 @@ export type $OpenApiTs = {
 		};
 		delete: {
 			req: DeleteSourceApiV1SourcesSourceIdDeleteData;
+			res: {
+				/**
+				 * Successful Response
+				 */
+				200: MessageResponse;
+				/**
+				 * Validation Error
+				 */
+				422: HTTPValidationError;
+			};
+		};
+		put: {
+			req: UpdateSourceApiV1SourcesSourceIdPutData;
 			res: {
 				/**
 				 * Successful Response

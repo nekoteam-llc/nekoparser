@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from typing import Union
 from urllib.parse import urlparse
 
@@ -24,6 +25,11 @@ router = APIRouter(
     prefix="/api/v1/sources",
     tags=["sources"],
 )
+
+
+class UpdateSourceRequest(BaseModel):
+    name: str | None
+    description: str | None
 
 
 class SourcesResponse(BaseModel):
@@ -180,9 +186,11 @@ async def upload_excel_file(file: UploadFile = File(...)) -> SourceCreateRespons
 
     with TheSession() as session:
         excel_source = ExcelSource(
-            minio_uuid=minio_uuid,
+            id=minio_uuid,
             filename=file.filename,
             state=ExcelSourceState.CREATED,
+            url=filestorage.get_url(minio_uuid),
+            url_expires=datetime.now() + timedelta(days=7),
         )
         session.add(excel_source)
         session.commit()
@@ -190,3 +198,39 @@ async def upload_excel_file(file: UploadFile = File(...)) -> SourceCreateRespons
         await schedule_excel_processing(excel_source.id)
 
     return SourceCreateResponse(id=excel_source.id)
+
+
+@router.put("/{source_id}")
+async def update_source(source_id: str, data: UpdateSourceRequest) -> MessageResponse:
+    """
+    Update the source by id
+    """
+
+    if not data.name and not data.description:
+        raise HTTPException(status_code=400, detail="Name or description is required")
+
+    with TheSession() as session:
+        if (
+            source := session.query(WebsiteSource)
+            .filter(WebsiteSource.id == source_id)
+            .first()
+        ):
+            if data.name:
+                source.name = data.name
+
+            if data.description:
+                source.description = data.description
+        elif (
+            source := session.query(ExcelSource)
+            .filter(ExcelSource.id == source_id)
+            .first()
+        ):
+            if data.name:
+                source.filename = data.name
+        else:
+            raise HTTPException(status_code=404, detail="Source not found")
+
+        session.commit()
+        await source_manager.reload_sources()
+
+    return MessageResponse(message="The source has been updated")

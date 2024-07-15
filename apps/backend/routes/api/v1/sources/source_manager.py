@@ -1,5 +1,6 @@
 import asyncio
 import json
+from datetime import datetime, timedelta
 from typing import Optional, Union
 from urllib.parse import urlparse
 
@@ -8,6 +9,7 @@ from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 
 from packages.database import ExcelSource, Product, TheSession, WebsiteSource
+from packages.filestorage import filestorage
 
 
 class WebsiteSourceModel(BaseModel):
@@ -23,9 +25,9 @@ class WebsiteSourceModel(BaseModel):
 class ExcelSourceModel(BaseModel):
     id: str
     filename: str
-    minio_uuid: str
     state: str
     type: str
+    url: str
 
 
 class SourceManager:
@@ -47,7 +49,7 @@ class SourceManager:
                 session.query(WebsiteSource).order_by(WebsiteSource.url.desc()).all()
             )
             excel_sources = (
-                session.query(ExcelSource).order_by(ExcelSource.minio_uuid.desc()).all()
+                session.query(ExcelSource).order_by(ExcelSource.id.desc()).all()
             )
             self._web_sources = [
                 WebsiteSourceModel(
@@ -67,13 +69,19 @@ class SourceManager:
                 for source in web_sources
             ]
 
+            for source in excel_sources:
+                if not source.url_expires or source.url_expires < datetime.now():
+                    source.url = filestorage.get_url(source.filename)
+                    source.url_expires = datetime.now() + timedelta(days=7)
+                    session.commit()
+
             self._excel_sources = [
                 ExcelSourceModel(
                     id=source.id,
                     filename=source.filename,
-                    minio_uuid=source.minio_uuid,
                     state=source.state.value,
                     type="excel",
+                    url=source.url,
                 )
                 for source in excel_sources
             ]
