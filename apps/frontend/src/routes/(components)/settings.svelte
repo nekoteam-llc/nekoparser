@@ -123,13 +123,14 @@
         <Select.Root
           selected={currentSettings ? { value: currentSettings.model } : undefined}
           onSelectedChange={(v) => {
-            currentModel = v?.value ?? "gpt-3.5-turbo-1106"
+            currentModel = v?.value ?? "gpt-4o-mini"
           }}
         >
           <Select.Trigger class="w-full">
             <Select.Value
               placeholder={currentSettings
                 ? {
+                  "gpt-4o-mini": "GPT 4o Mini",
                   "gpt-3.5-turbo-1106": "GPT 3.5 Turbo 1106",
                   "gpt-4o": "GPT 4o",
                   "gpt-4-1106-preview": "GPT 4 Turbo 1106",
@@ -139,6 +140,16 @@
           </Select.Trigger>
           <Select.Content class="bg-zinc-900">
             <Select.Item
+              value="gpt-4o-mini"
+              class="block border border-border transition-colors ease-in-out"
+            >
+              <div class="flex items-center gap-2">
+                <Coins class="h-4 w-4" />
+                GPT 4o Mini
+              </div>
+              <p class="text-sm text-gray-400">Cheapest and fastest model, good for most tasks</p>
+            </Select.Item>
+            <Select.Item
               value="gpt-3.5-turbo-1106"
               class="block border border-border transition-colors ease-in-out"
             >
@@ -146,7 +157,7 @@
                 <Coins class="h-4 w-4" />
                 GPT 3.5 Turbo 1106
               </div>
-              <p class="text-sm text-gray-400">Cheapest and fastest model, good for most tasks</p>
+              <p class="text-sm text-gray-400">Cheap and fast model, yet outdated</p>
             </Select.Item>
             <Select.Item
               value="gpt-4o"

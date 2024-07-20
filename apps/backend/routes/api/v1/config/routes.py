@@ -33,7 +33,7 @@ async def get_config() -> ConfigModel:
         if not config:
             config = Config(
                 chatgpt_key="",
-                model="gpt-3.5-turbo-1106",
+                model="gpt-4o-mini",
                 pages_concurrency=5,
                 products_concurrency=30,
                 required=["name", "description"],
